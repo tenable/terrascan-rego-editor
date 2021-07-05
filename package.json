@@ -23,7 +23,33 @@
 				"command": "regoeditor.generateRego",
 				"title": "Generate Rego"
 			}
-		]
+		],
+		"keybindings": [
+			{
+				"command": "regoeditor.generateRego",
+				"key": "ctrl+alt+g"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"when": "resourceLangId == json",
+					"command": "regoeditor.generateRego"
+				}
+			],
+			"editor/context": [
+				{
+					"when": "resourceLangId == json",
+					"command": "regoeditor.generateRego"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "regoeditor.generateRego",
+					"when": "resourceLangId == json"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

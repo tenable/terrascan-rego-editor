@@ -18,3 +18,15 @@ interface RepoReleaseAssets {
     content_type: string,
     browser_download_url: string   
 }
+
+// ResourceConfig represents individual resource config
+// object present in the standardized json
+export interface ResourceConfig {
+    id: string,
+    name: string,
+    source: string,
+    type: string,
+    config: any
+}
+
+export type AllResourceConfig = Record<string, ResourceConfig[]>;
