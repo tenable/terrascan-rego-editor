@@ -1,49 +1,26 @@
 import * as vscode from 'vscode';
-import {Utils} from './utils/utils';
+import { Utils } from './utils/utils';
 import { TerrascanDownloader } from './downloader/terrascanDownloader';
+import { generateConfigCommand as generateConfig } from "./commands/generateConfigCommand";
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
-	
-	console.log('extension active');
 
-	if (!Utils.isTerrascanBinaryPresent(context)) {
-        downloadTools(context);
+    if (!Utils.isTerrascanBinaryPresent(context)) {
+        Utils.downloadTools(context);
     }
 
-	let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', () => {
-		vscode.window.showInformationMessage('Command not implemented !!');
-	});
-	context.subscriptions.push(generateConfigCommand);
-
-	let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', () => {
-		vscode.window.showInformationMessage('Command not implemented !!');
-	});
-	context.subscriptions.push(generateRegoCommand);
-}
-
-// this method is called when your extension is deactivated
-export function deactivate() {}
-
-function downloadTools(context: vscode.ExtensionContext) {
-
-    let progressOptions: vscode.ProgressOptions = {
-        location: vscode.ProgressLocation.Notification,
-        title: "Download Rego Editor's tools",
-        cancellable: false
-    };
-
-    return vscode.window.withProgress(progressOptions, async (progress) => {
-
-        progress.report({ increment: 10 });
-        let terrascanDownload = new TerrascanDownloader(context).downloadBinary(progress, true);
-
-        return Promise.all([terrascanDownload])
-            .then(([isTerrascanDownloaded]) => {
-                vscode.window.showInformationMessage("Rego Editor's tools downloaded successfully");
-            })
-            .catch((error) => {
-                vscode.window.showErrorMessage("Couldn't download Rego Editor's tools, error: " + error);
-            });
+    let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', async (uri: vscode.Uri) => generateConfig(context, uri));
+    
+    let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', () => {
+        vscode.window.showInformationMessage('Command not implemented !!');
     });
+
+    context.subscriptions.push(
+        generateRegoCommand,
+        generateConfigCommand
+    );
 }
+
+// this method is called when the extension is deactivated
+export function deactivate() { }
