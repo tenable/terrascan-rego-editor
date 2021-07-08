@@ -1,5 +1,5 @@
 export class RegoVariable {
-    constructor(private _name: string, private _type: VariableType, private _childs?: RegoVariable[]) {
+    constructor(private _name: string, private _type: VariableType, public isRoot: boolean, private _parent?:RegoVariable | null, private _childs?: RegoVariable[]) {
         if (!this._childs) {
             this._childs = [];
         }
@@ -16,6 +16,15 @@ export class RegoVariable {
     get childs(): RegoVariable[] {
         return this._childs!;
     }
+    
+    get parent() : RegoVariable {
+        return this._parent!;
+    }
+    
+    set value(parent : RegoVariable) {
+        this._parent = parent;
+    }
+    
 
     addChild(child: RegoVariable): void {
         this._childs!.push(child);

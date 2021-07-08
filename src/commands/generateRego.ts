@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { AllResourceConfig, ResourceConfig } from '../interface/terrascanMetadata';
-import {VariableType, RegoVariable} from '../interface/regoElement';
+import { VariableType, RegoVariable } from '../interface/regoElement';
 
 export async function generateRego(uri: vscode.Uri) {
- 
+
     let editor = vscode.window.activeTextEditor;
     console.log("editor", editor!.document.uri);
     console.log("uri", uri);
@@ -21,7 +21,7 @@ export async function generateRego(uri: vscode.Uri) {
             output = parseFileContents(content);
         }
 
-        if(output.size !== 0) {
+        if (output.size !== 0) {
             let doc = await vscode.workspace.openTextDocument({
                 language: "rego",
                 content: buildRegoOutput(output)
@@ -43,12 +43,12 @@ function parseFileContents(content: string): Map<string, RegoVariable> {
                 // for now, pick only the first element in the resource list
                 // later we can club together the config object from each resource config
                 let resourceConfig: ResourceConfig = resourceConfigList[0];
-                if(typeof resourceConfig !== "object") {
+                if (typeof resourceConfig !== "object") {
                     vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
-                    return resourceTypes;            
+                    return resourceTypes;
                 }
                 if (resourceConfig.config !== null) {
-                    let regoElem = new RegoVariable("config", VariableType.object);
+                    let regoElem = new RegoVariable("config", VariableType.object, true, null);
                     addObjectElements(regoElem, resourceConfig.config);
                     resourceTypes.set(value[0], regoElem);
                 }
@@ -68,58 +68,76 @@ function buildRegoOutput(input: Map<string, RegoVariable>): string {
         output += `\tconfig := api.config\n`;
 
         regoElement.childs.forEach((elem, i) => {
-            output += `\tvar${i} := config.${elem.name}\n`;
+            let varName: string = "var" + i.toString();
+            if (elem.type === VariableType.array) {
+                output += `\t${varName} := config.${elem.name}[_]\n`;
+            } else {
+                output += `\t${varName} := config.${elem.name}\n`;
+            }
+            if (elem.childs.length > 0) {
+                elem.childs.forEach((child, j) => {
+                    output += buildChildsLines(child, varName, j.toString(), elem.name);
+                });
+            }
         });
-        output += "\n}\n\n";
+        output += "\n}\n";
     });
     return output;
 }
 
+function buildChildsLines(vairable: RegoVariable, variablePrefix: string, variableSuffix: string, valuePrefix: string): string {
+    let output: string = "";
+    let varName: string = variablePrefix + "_" + variableSuffix;
+
+    if (vairable.type === VariableType.array) {
+        output += `\t#${varName} := ${valuePrefix}.${vairable.name}[_]\n`;
+    } else {
+        output += `\t#${varName} := ${valuePrefix}.${vairable.name}\n`;
+    }
+
+    if (vairable.childs.length > 0) {
+        vairable.childs.forEach((elem, i) => {
+            output += buildChildsLines(elem, varName, i.toString(), elem.name);
+        });
+    }
+    return output;
+}
+
 function addObjectElements(parent: RegoVariable, obj: any): void {
-    Object.keys(obj).forEach(key => {
-        let childElem: RegoVariable;
-        let value = obj[key];
-        if (Array.isArray(value)) {
-            childElem = new RegoVariable(key, VariableType.array);
-            parent.addChild(childElem);
-            addArrayElements(childElem, value);
-        } else if (value && typeof value === "object") {
-            childElem = new RegoVariable(key, VariableType.object);
-            parent.addChild(childElem);
-            addObjectElements(childElem, value);
-        } else if (value && typeof value === "string") {
-            childElem = new RegoVariable(key, VariableType.string);
-            parent.addChild(childElem);
-        } else if (value && typeof value === "number") {
-            childElem = new RegoVariable(key, VariableType.number);
-            parent.addChild(childElem);
-        } else if (value && typeof value === "boolean") {
-            childElem = new RegoVariable(key, VariableType.boolean);
-            parent.addChild(childElem);
-        }
-    });
+    if (obj) {
+        Object.keys(obj).forEach(key => {
+            let value = obj[key];
+            addElements(parent, key, value);
+        });
+    }
 }
 
 function addArrayElements(parent: RegoVariable, arr: any[]): void {
+    if (arr) {
+        arr.forEach((value, i) => {
+            addElements(parent, i.toString(), value);
+        });
+    }
+}
+
+function addElements(parent: RegoVariable, key: string, value: any): void {
     let childElem: RegoVariable;
-    arr.forEach((value, i) => {
-        if (Array.isArray(value)) {
-            childElem = new RegoVariable(i.toString(), VariableType.array);
-            parent.addChild(childElem);
-            addArrayElements(childElem, value);
-        } else if (value && typeof value === "object") {
-            childElem = new RegoVariable(i.toString(), VariableType.array);
-            parent.addChild(childElem);
-            addObjectElements(childElem, value);
-        } else if (value && typeof value === "string") {
-            childElem = new RegoVariable(i.toString(), VariableType.string);
-            parent.addChild(childElem);
-        } else if (value && typeof value === "number") {
-            childElem = new RegoVariable(i.toString(), VariableType.number);
-            parent.addChild(childElem);
-        } else if (value && typeof value === "boolean") {
-            childElem = new RegoVariable(i.toString(), VariableType.boolean);
-            parent.addChild(childElem);
-        }
-    });
+    if (Array.isArray(value)) {
+        childElem = new RegoVariable(key, VariableType.array, false, parent);
+        addArrayElements(childElem, value);
+        parent.addChild(childElem);
+    } else if (typeof value === "object") {
+        childElem = new RegoVariable(key, VariableType.object, false, parent);
+        addObjectElements(childElem, value);
+        parent.addChild(childElem);
+    } else if (typeof value === "string") {
+        childElem = new RegoVariable(key, VariableType.string, false, parent);
+        parent.addChild(childElem);
+    } else if (typeof value === "number") {
+        childElem = new RegoVariable(key, VariableType.number, false, parent);
+        parent.addChild(childElem);
+    } else if (typeof value === "boolean") {
+        childElem = new RegoVariable(key, VariableType.boolean, false, parent);
+        parent.addChild(childElem);
+    }
 }
