@@ -76,7 +76,7 @@ function buildRegoOutput(input: Map<string, RegoVariable>): string {
             }
             if (elem.childs.length > 0) {
                 elem.childs.forEach((child, j) => {
-                    output += buildChildsLines(child, varName, j.toString(), elem.name);
+                    output += buildChildsLines(child, varName, j.toString(), varName);
                 });
             }
         });
@@ -97,7 +97,7 @@ function buildChildsLines(vairable: RegoVariable, variablePrefix: string, variab
 
     if (vairable.childs.length > 0) {
         vairable.childs.forEach((elem, i) => {
-            output += buildChildsLines(elem, varName, i.toString(), elem.name);
+            output += buildChildsLines(elem, varName, i.toString(), varName);
         });
     }
     return output;
