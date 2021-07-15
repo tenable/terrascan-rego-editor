@@ -1,7 +1,7 @@
 export class RegoVariable {
-    constructor(private _name: string, private _type: VariableType, public isRoot: boolean, private _parent?:RegoVariable | null, private _childs?: RegoVariable[]) {
-        if (!this._childs) {
-            this._childs = [];
+    constructor(private _name: string, private _type: VariableType, public isRoot: boolean, private _parent?:RegoVariable | null, private _children?: RegoVariable[]) {
+        if (!this._children) {
+            this._children = [];
         }
     }
 
@@ -13,8 +13,8 @@ export class RegoVariable {
         return this._type;
     }
 
-    get childs(): RegoVariable[] {
-        return this._childs!;
+    get children(): RegoVariable[] {
+        return this._children!;
     }
     
     get parent() : RegoVariable {
@@ -27,7 +27,7 @@ export class RegoVariable {
     
 
     addChild(child: RegoVariable): void {
-        this._childs!.push(child);
+        this._children!.push(child);
     }
 }
 

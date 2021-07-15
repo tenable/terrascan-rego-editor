@@ -1,22 +1,23 @@
-import { ExtensionContext, window, OutputChannel, Uri , ProgressLocation} from "vscode";
+import { ExtensionContext, window, OutputChannel, Uri, ProgressLocation, workspace } from "vscode";
 import { Utils } from "../utils/utils";
-import { TERRASCAN_IAC_TYPES, IAC_TYPE_QUICK_PICK_PLACEHOLDER, REGO_EDITOR_TOOLS_NOT_INSTALLED, INSTALL_OPTION, REGO_EDITOR_TOOLS_DOWNLOAD_FAILURE, REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS } from '../constants';
+import * as constants from '../constants';
 import { TerrascanDownloader } from '../downloader/terrascanDownloader';
 import { sep } from "path";
-import { v4 as uuidV4 } from "uuid";
 import { exec } from "child_process";
+import * as path from "path";
+
 
 export async function generateConfigCommand(context: ExtensionContext, uri: Uri) {
 
     // prompt for IAC type
-    const iacType = await window.showQuickPick(TERRASCAN_IAC_TYPES, { placeHolder: IAC_TYPE_QUICK_PICK_PLACEHOLDER });
+    const iacType = await window.showQuickPick(constants.TERRASCAN_IAC_TYPES, { placeHolder: constants.IAC_TYPE_QUICK_PICK_PLACEHOLDER });
     if (iacType !== undefined) {
         window.withProgress({
             location: ProgressLocation.Window,
             cancellable: false,
             title: 'Generating Config'
         }, async (progress) => {
-            progress.report({  increment: 0 });
+            progress.report({ increment: 0 });
             generateConfig(context, uri, iacType);
             progress.report({ increment: 100 });
         });
@@ -30,22 +31,21 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
     console.log("Executing generateconfig command!");
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
-        let userAction = await window.showInformationMessage(REGO_EDITOR_TOOLS_NOT_INSTALLED, INSTALL_OPTION);
+        let userAction = await window.showInformationMessage(constants.REGO_EDITOR_TOOLS_NOT_INSTALLED, constants.INSTALL_OPTION);
         if (userAction !== undefined) {
             try {
                 await new TerrascanDownloader(context).downloadWithProgress(false);
-                window.showInformationMessage(REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS);
+                window.showInformationMessage(constants.REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS);
             } catch (error: any) {
-                window.showErrorMessage(REGO_EDITOR_TOOLS_DOWNLOAD_FAILURE + error.message);
+                window.showErrorMessage(constants.REGO_EDITOR_TOOLS_DOWNLOAD_FAILURE + error.message);
                 return;
             }
         }
     }
 
-    const iacFilePath = uri.fsPath;
+    const parsedUri = Utils.parseUri(uri);
 
-    let fileName = uuidV4().replace(/\-/g, "");
-    let scanOptions = `-i ${iacType} -f ${iacFilePath} -o json --config-only`;
+    let scanOptions = `-i ${iacType} -f ${parsedUri.filePath} -o json --config-only`;
 
     let terrascanLocation: string = context.extensionPath + sep + 'executables' + sep + 'terrascan' + sep + 'terrascan';
     if (Utils.isWindowsPlatform()) {
@@ -53,12 +53,12 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
     }
 
     let accuricsOutputChannel: OutputChannel = window.createOutputChannel('rego-editor');
-	accuricsOutputChannel.appendLine(`Running RegoEditor...`);
-	accuricsOutputChannel.show();
+    accuricsOutputChannel.appendLine(`Running RegoEditor...`);
+    accuricsOutputChannel.show();
 
     exec(`${terrascanLocation} scan ${scanOptions}`, (error, stdout, stderr) => {
         accuricsOutputChannel.appendLine(`CMD : ${terrascanLocation} scan ${scanOptions}`);
-        let configJson:string = "";
+        let configJson: string = "";
         if (error) {
             if (error.code === 3) {
                 window.setStatusBarMessage('Config generated!', 2000);
@@ -81,7 +81,15 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
             configJson = stdout;
         }
         if (configJson !== "") {
-            Utils.saveAndOpen(configJson, fileName);
+            let fileName = terrascanConfigName(parsedUri.fileName, "_terrascanConfig");
+            let uri = Utils.writeFile(configJson, fileName, constants.EXT_JSON, parsedUri.folderPath);
+            workspace.openTextDocument(uri).then(doc => {
+                window.showTextDocument(doc);
+            });
         }
     });
+}
+
+function terrascanConfigName(fileName: string, suffix: string): string {
+    return fileName.replace(path.extname(fileName), "") + suffix;
 }

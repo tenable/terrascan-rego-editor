@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 import { Utils } from './utils/utils';
-import { TerrascanDownloader } from './downloader/terrascanDownloader';
 import { generateRego } from './commands/generateRego';
-import { generateConfigCommand as generateConfig } from "./commands/generateConfigCommand";
+import { generateConfigCommand as generateConfig } from "./commands/generateConfig";
+import { showRegoHelperTemplate } from "./commands/showRegoHelperTemplate";
+import { resetPolicySuffixCounter } from "./commands/resetPolicySuffixCounter";
 
-// this method is called when your extension is activated
+// this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
-
-    console.log('extension active');
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
         Utils.downloadTools(context);
@@ -15,11 +14,17 @@ export function activate(context: vscode.ExtensionContext) {
 
     let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', async (uri: vscode.Uri) => generateConfig(context, uri));
 
-    let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', async (uri: vscode.Uri) => generateRego(uri));
+    let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', async (uri: vscode.Uri) => generateRego(context,uri));
+
+    let showRegoHelperTemplateCommand = vscode.commands.registerCommand('regoeditor.showRegoHelperTemplate', async () => showRegoHelperTemplate(context));
+    
+    let resetPolicySuffixCounterCommand = vscode.commands.registerCommand('regoeditor.resetPolicySuffixCounter', async () => resetPolicySuffixCounter(context));
 
     context.subscriptions.push(
         generateRegoCommand,
-        generateConfigCommand
+        generateConfigCommand,
+        showRegoHelperTemplateCommand,
+        resetPolicySuffixCounterCommand
     );
 }
 

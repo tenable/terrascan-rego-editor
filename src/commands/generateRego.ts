@@ -1,84 +1,128 @@
 import * as vscode from "vscode";
 import { AllResourceConfig, ResourceConfig } from '../interface/terrascanMetadata';
 import { VariableType, RegoVariable } from '../interface/regoElement';
+import * as constants from '../constants';
+import { Utils } from "../utils/utils";
+import * as os from "os";
 
-export async function generateRego(uri: vscode.Uri) {
+
+export async function generateRego(context: vscode.ExtensionContext, uri: vscode.Uri) {
 
     let editor = vscode.window.activeTextEditor;
-    console.log("editor", editor!.document.uri);
-    console.log("uri", uri);
+
     if (uri === undefined && editor === undefined) {
         vscode.window.showErrorMessage("select file");
     } else {
         let content: string = "";
-        let output: Map<string, RegoVariable> = new Map();
-        if (uri) {
+        let isSelection: boolean = false;
+
+        if (uri && editor) {
+            if (uri.fsPath === editor.document.uri.fsPath && !editor.selection.isEmpty) {
+                content = editor.document.getText(editor.selection);
+                isSelection = true;
+            } else {
+                let contents = await vscode.workspace.fs.readFile(uri);
+                content = contents.toString();
+            }
+        } else if (uri) {
             let contents = await vscode.workspace.fs.readFile(uri);
             content = contents.toString();
-            output = parseFileContents(content);
         } else if (editor) {
-            content = editor.document.getText();
-            output = parseFileContents(content);
+            uri = editor.document.uri;
+            if (!editor.selection.isEmpty) {
+                content = editor.document.getText(editor.selection);
+                isSelection = true;
+            } else {
+                content = editor.document.getText();
+            }
         }
 
+        let output: Map<string, RegoVariable> = new Map();
+        output = parseFileContents(content, isSelection);
+
         if (output.size !== 0) {
-            let doc = await vscode.workspace.openTextDocument({
-                language: "rego",
-                content: buildRegoOutput(output)
-            });
-            vscode.window.showTextDocument(doc);
+            await generatePolicyFiles(uri, context,output);
+            if (context.globalState.get("showRegoHelperTemplatePrompt", true)) {
+                regoHelperTemplatePrompt(context);
+            }
         }
     }
 }
 
-function parseFileContents(content: string): Map<string, RegoVariable> {
+function parseFileContents(content: string, isSelection: boolean): Map<string, RegoVariable> {
     let resourceTypes: Map<string, RegoVariable> = new Map();
-    let allResConfig: AllResourceConfig = JSON.parse(content);
-    if (allResConfig) {
-        // console.log(allResConfig);
-        Object.entries(allResConfig).forEach((value) => {
-            console.log(value[0]);
-            let resourceConfigList = value[1];
-            if (resourceConfigList.length > 0) {
-                // for now, pick only the first element in the resource list
-                // later we can club together the config object from each resource config
-                let resourceConfig: ResourceConfig = resourceConfigList[0];
-                if (typeof resourceConfig !== "object") {
-                    vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
-                    return resourceTypes;
-                }
-                if (resourceConfig.config !== null) {
-                    let regoElem = new RegoVariable("config", VariableType.object, true, null);
-                    addObjectElements(regoElem, resourceConfig.config);
-                    resourceTypes.set(value[0], regoElem);
-                }
+    if (isSelection) {
+        try {
+            let allResConfig: ResourceConfig = JSON.parse(content);
+            let resourceConfig: ResourceConfig = allResConfig;
+            if (typeof resourceConfig !== "object") {
+                vscode.window.showErrorMessage("selected text is not a Terrascan standardized config json object");
+                return resourceTypes;
             }
-        });
+            if (!!resourceConfig.config) {
+                let regoElem = new RegoVariable("config", VariableType.object, true, null);
+                addObjectElements(regoElem, resourceConfig.config);
+                resourceTypes.set(resourceConfig.type, regoElem);
+            }
+        } catch (e) {
+            vscode.window.showErrorMessage(e.message);
+            return resourceTypes;
+        }
     } else {
-        vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
+        let allResConfig: AllResourceConfig = JSON.parse(content);
+        if (allResConfig) {
+            console.log(allResConfig);
+            Object.entries(allResConfig).forEach((value) => {
+                console.log(value[0]);
+                let resourceConfigList = value[1];
+                if (resourceConfigList.length > 0) {
+                    // for now, pick only the first element in the resource list
+                    // later we can club together the config object from each resource config
+                    let resourceConfig: ResourceConfig = resourceConfigList[0];
+                    if (typeof resourceConfig !== "object") {
+                        vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
+                        return resourceTypes;
+                    }
+                    if (!!resourceConfig.config) {
+                        let regoElem = new RegoVariable("config", VariableType.object, true, null);
+                        addObjectElements(regoElem, resourceConfig.config);
+                        resourceTypes.set(value[0], regoElem);
+                    }
+                }
+            });
+
+        } else {
+            vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
+        }
     }
+
     return resourceTypes;
 }
 
-function buildRegoOutput(input: Map<string, RegoVariable>): string {
-    let output: string = "package accurics\n\n";
-    input.forEach((regoElement, resourceType) => {
-        output += `${resourceType}[api.id] {\n`;
-        output += `\tapi := input.${resourceType}[_]\n`;
-        output += `\tconfig := api.config\n`;
+function buildRegoOutput(input: Map<string, RegoVariable>,context:vscode.ExtensionContext): string {
+    let output: string = `package accurics\n\n`;
+    if (context.globalState.get("showRegoHelperTemplate", true)) {
+        output += `${constants.REGO_HELPER_TEMPLATE}\n\n`;
+    }
 
-        regoElement.childs.forEach((elem, i) => {
-            let varName: string = "var" + i.toString();
-            if (elem.type === VariableType.array) {
-                output += `\t${varName} := config.${elem.name}[_]\n`;
-            } else {
-                output += `\t${varName} := config.${elem.name}\n`;
-            }
-            if (elem.childs.length > 0) {
-                elem.childs.forEach((child, j) => {
-                    output += buildChildsLines(child, varName, j.toString(), varName);
-                });
-            }
+    output += `# This is an example for a Rego rule. The value inside the brackets [array.id] is returned if the rule evaluates to be true.
+    # This rule will return the 'id' of every document in 'array' that has 'authorization' key set to "NONE"`;
+
+    input.forEach((regoElement, resourceType) => {
+        output += `${resourceType}[array.id] {\n`;
+        output += `\t# array := input.${resourceType}[_]\n`;
+        // if (regoElement.children.length > 0) {
+        //     let elm = regoElement.children[0];
+        //     output += `\t# array.config.${elm.name} == ${Utils.defaultVal(elm.type)}\n`;
+        // }
+
+        regoElement.children.forEach((elem) => {
+            output += `\t# array.config.${elem.name} == ${Utils.defaultVal(elem.type)}\n`;
+            // if (elem.children.length > 0) {
+            //     elem.children.forEach((child, j) => {
+            //         output += buildChildsLines(child, varName, j.toString(), varName);
+            //     });
+            // }
         });
         output += "\n}\n";
     });
@@ -95,8 +139,8 @@ function buildChildsLines(vairable: RegoVariable, variablePrefix: string, variab
         output += `\t#${varName} := ${valuePrefix}.${vairable.name}\n`;
     }
 
-    if (vairable.childs.length > 0) {
-        vairable.childs.forEach((elem, i) => {
+    if (vairable.children.length > 0) {
+        vairable.children.forEach((elem, i) => {
             output += buildChildsLines(elem, varName, i.toString(), varName);
         });
     }
@@ -140,4 +184,58 @@ function addElements(parent: RegoVariable, key: string, value: any): void {
         childElem = new RegoVariable(key, VariableType.boolean, false, parent);
         parent.addChild(childElem);
     }
+}
+
+function buildMetaDataOutput(regoPath: string = "", policyType: string = "", resourceType: string = "", id: string = ""): string {
+    let metaDataTemplate = `{
+        "name": "${id}",
+        "file": "${regoPath}",
+        "policy_type": "${policyType}",
+        "resource_type": "${resourceType}",
+        "template_args": null,
+        "severity": "LOW",
+        "description": "",
+        "category": "",
+        "version":1,
+        "id": "${id}"
+    }`;
+
+    return metaDataTemplate;
+}
+
+async function regoHelperTemplatePrompt(context:vscode.ExtensionContext) {
+    let userAction = await vscode.window.showInformationMessage(constants.REGO_HELPER_TEMPLATE_PROMPT, constants.DO_NOT_PROMPT_OPTION, constants.DISABLE_OPTION);
+    
+    if (userAction === constants.DO_NOT_PROMPT_OPTION) {
+        context.globalState.update("showRegoHelperTemplatePrompt", false);
+    } else if (userAction === constants.DISABLE_OPTION) {
+        context.globalState.update("showRegoHelperTemplate", false);
+        context.globalState.update("showRegoHelperTemplatePrompt", false);
+    }
+}
+
+async function generatePolicyFiles(uri:vscode.Uri, context:vscode.ExtensionContext,data:Map<string, RegoVariable>) {
+    const parsedUri = Utils.parseUri(uri);
+
+            const resourceType = data.keys().next().value;
+            const provider = "PROVIDER";
+            let counter = context.globalState.get("policySuffixCounter", 1);
+            context.globalState.update("policySuffixCounter", counter + 1);
+
+            const fileName = `${os.userInfo().username.toUpperCase()}_${provider}_${Utils.leftFillNum(counter)}`;
+            let regoFileUri = Utils.writeFile(buildRegoOutput(data, context), fileName, constants.EXT_REGO, parsedUri.folderPath);
+
+            vscode.workspace.openTextDocument(regoFileUri).then(doc => {
+                vscode.window.showTextDocument(doc, {
+                    viewColumn: vscode.ViewColumn.Beside
+                });
+            });
+
+            let metaFileUri = Utils.writeFile(buildMetaDataOutput(fileName + constants.EXT_REGO, provider, resourceType, fileName), fileName, constants.EXT_JSON, parsedUri.folderPath);
+
+            vscode.workspace.openTextDocument(metaFileUri).then(doc => {
+                vscode.window.showTextDocument(doc, {
+                    viewColumn: vscode.ViewColumn.Beside
+                });
+            });
 }
