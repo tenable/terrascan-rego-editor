@@ -105,8 +105,7 @@ function buildRegoOutput(input: Map<string, RegoVariable>,context:vscode.Extensi
         output += `${constants.REGO_HELPER_TEMPLATE}\n\n`;
     }
 
-    output += `# This is an example for a Rego rule. The value inside the brackets [array.id] is returned if the rule evaluates to be true.
-    # This rule will return the 'id' of every document in 'array' that has 'authorization' key set to "NONE"`;
+    output += `# This is an example for a Rego rule. The value inside the brackets [array.id] is returned if the rule evaluates to be true.\n# This rule will return the 'id' of every document in 'array' that has 'authorization' key set to "NONE"\n\n`;
 
     input.forEach((regoElement, resourceType) => {
         output += `${resourceType}[array.id] {\n`;
