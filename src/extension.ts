@@ -1,49 +1,32 @@
 import * as vscode from 'vscode';
-import {Utils} from './utils/utils';
-import { TerrascanDownloader } from './downloader/terrascanDownloader';
+import { Utils } from './utils/utils';
+import { generateRego } from './commands/generateRego';
+import { generateConfigCommand as generateConfig } from "./commands/generateConfig";
+import { showRegoHelperTemplate } from "./commands/showRegoHelperTemplate";
+import { resetPolicySuffixCounter } from "./commands/resetPolicySuffixCounter";
 
-// this method is called when your extension is activated
+// this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
-	
-	console.log('extension active');
 
-	if (!Utils.isTerrascanBinaryPresent(context)) {
-        downloadTools(context);
+    if (!Utils.isTerrascanBinaryPresent(context)) {
+        Utils.downloadTools(context);
     }
 
-	let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', () => {
-		vscode.window.showInformationMessage('Command not implemented !!');
-	});
-	context.subscriptions.push(generateConfigCommand);
+    let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', async (uri: vscode.Uri) => generateConfig(context, uri));
 
-	let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', () => {
-		vscode.window.showInformationMessage('Command not implemented !!');
-	});
-	context.subscriptions.push(generateRegoCommand);
+    let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', async (uri: vscode.Uri) => generateRego(context,uri));
+
+    let showRegoHelperTemplateCommand = vscode.commands.registerCommand('regoeditor.showRegoHelperTemplate', async () => showRegoHelperTemplate(context));
+    
+    let resetPolicySuffixCounterCommand = vscode.commands.registerCommand('regoeditor.resetPolicySuffixCounter', async () => resetPolicySuffixCounter(context));
+
+    context.subscriptions.push(
+        generateRegoCommand,
+        generateConfigCommand,
+        showRegoHelperTemplateCommand,
+        resetPolicySuffixCounterCommand
+    );
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
-
-function downloadTools(context: vscode.ExtensionContext) {
-
-    let progressOptions: vscode.ProgressOptions = {
-        location: vscode.ProgressLocation.Notification,
-        title: "Download Rego Editor's tools",
-        cancellable: false
-    };
-
-    return vscode.window.withProgress(progressOptions, async (progress) => {
-
-        progress.report({ increment: 10 });
-        let terrascanDownload = new TerrascanDownloader(context).downloadBinary(progress, true);
-
-        return Promise.all([terrascanDownload])
-            .then(([isTerrascanDownloaded]) => {
-                vscode.window.showInformationMessage("Rego Editor's tools downloaded successfully");
-            })
-            .catch((error) => {
-                vscode.window.showErrorMessage("Couldn't download Rego Editor's tools, error: " + error);
-            });
-    });
-}
+// this method is called when the extension is deactivated
+export function deactivate() { }

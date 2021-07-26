@@ -1,7 +1,12 @@
-import { ExtensionContext, window, workspace } from 'vscode';
-import { lstatSync, existsSync } from 'fs';
-import { sep } from 'path';
+import { ExtensionContext, window, workspace, Uri, ProgressOptions, ProgressLocation } from 'vscode';
+import { existsSync, writeFileSync } from 'fs';
+import { TerrascanDownloader } from '../downloader/terrascanDownloader';
+
+import { sep, join } from 'path';
 import { platform } from 'os';
+import { ParsedUri } from '../types/parsedUri';
+import * as path from "path";
+import { VariableType } from '../interface/regoElement';
 
 export class Utils {
 
@@ -30,5 +35,58 @@ export class Utils {
             terrascanLocation += '.exe';
         }
         return existsSync(terrascanLocation);
+    }
+
+    static writeFile(content: string, fileName: string, ext: string, loc: string): Uri {
+        const filePath = join(loc, fileName + ext);
+        writeFileSync(filePath, content, {
+            encoding: "utf8",
+            flag: "w"
+        });
+        return Uri.file(filePath);
+    }
+
+    static downloadTools(context: ExtensionContext) {
+
+        let progressOptions: ProgressOptions = {
+            location: ProgressLocation.Notification,
+            title: "Download Rego Editor's tools",
+            cancellable: false
+        };
+
+        return window.withProgress(progressOptions, async (progress) => {
+
+            progress.report({ increment: 10 });
+            let terrascanDownload = new TerrascanDownloader(context).downloadBinary(progress, true);
+
+            return Promise.all([terrascanDownload])
+                .then(([isTerrascanDownloaded]) => {
+                    window.showInformationMessage("Rego Editor tools downloaded successfully");
+                })
+                .catch((error) => {
+                    window.showErrorMessage("Couldn't download Rego Editor tools, error: " + error);
+                });
+        });
+    }
+
+    static parseUri(uri: Uri): ParsedUri {
+        let filePath = uri.fsPath;
+        let folderPath = path.dirname(filePath);
+        let fileName = path.basename(filePath);
+        return new ParsedUri(filePath, folderPath, fileName);
+    }
+
+    static defaultVal(type: VariableType): any {
+        switch (type) {
+            case VariableType.object: return '{}';
+            case VariableType.array: return '[]';
+            case VariableType.string: return '""';
+            case VariableType.number: return 0;
+            case VariableType.boolean: return false;
+        }
+    }
+
+    static leftFillNum(num:number, targetLength:number=4, padChar:string="0") {
+        return num.toString().padStart(targetLength, padChar);
     }
 }
