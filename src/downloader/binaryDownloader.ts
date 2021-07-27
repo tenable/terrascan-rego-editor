@@ -4,8 +4,7 @@ import { arch, platform } from "os";
 import { sep } from "path";
 import { HttpClient } from "typed-rest-client/HttpClient";
 import { ExtensionContext, Progress, ProgressLocation, ProgressOptions, window } from "vscode";
-import { LatestReleaseResponse } from "../interface/terrascanMetadata";
-import { Utils } from "../utils/utils";
+import { TerrascanRelease } from "../interface/terrascanMetadata";
 
 //interface to define the type for vscode progress notification
 export interface ProgressType {
@@ -18,7 +17,7 @@ export abstract class BinaryDownloader {
     constructor(public context: ExtensionContext) { }
 
     // This method will download the dependency with a progress bar.
-    downloadWithProgress(isActivateCall: boolean) {
+    downloadWithProgress() {
         let progressOptions: ProgressOptions = {
             location: ProgressLocation.Notification,
             title: 'Downloading Accurics tools',
@@ -26,41 +25,54 @@ export abstract class BinaryDownloader {
         };
 
         return window.withProgress(progressOptions, (progress) => {
-            
             // progress report is hardcoded for now
             progress.report({ increment: 0 });
             return new Promise<boolean>((resolve, reject) => {
-                this.downloadBinary(progress, isActivateCall)
+                this.downloadBinary(progress)
                     .then((downloadComplete: boolean) => {
-                        // console.log('dependencies downloaded');
                         progress.report({ increment: 100 });
                         resolve(downloadComplete);
                     })
                     .catch((reason: any) => {
-                        // console.log('terrascan download failed');
                         reject(reason);
                     });
             });
         });
     }
 
-    protected async download(extensionPath: string, browserDownloadUrl: string, githubResponse?: LatestReleaseResponse): Promise<string> {
+    protected async download(extensionPath: string, browserDownloadUrl: string, githubResponse: TerrascanRelease): Promise<string> {
+        let matchFound: boolean = false;
 
         if (githubResponse !== undefined) {
             for (let i = 0; i < githubResponse.assets.length; i++) {
                 let assetName: string = githubResponse.assets[i].name.toLowerCase();
-
-                let currentPlatform: string = platform();
-                if (Utils.isWindowsPlatform()) {
-                    currentPlatform = 'windows';
+                if (assetName === "checksums.txt") {
+                    continue;
                 }
 
-                //contains os name and correct arch
-                if (assetName.includes(currentPlatform) && assetName.includes(arch().substring(1))) {
+                switch (platform()) {
+                    case "darwin":
+                        matchFound = assetName.includes("darwin") && hasOSArch(assetName);
+                        break;
+                    case "win32":
+                        matchFound = assetName.includes("windows") && hasOSArch(assetName);
+                        break;
+                    case "linux":
+                        matchFound = assetName.includes("linux") && hasOSArch(assetName);
+                        break;
+                    default:
+                        throw new Error(`Terrascan doesn't support ${platform()}`);
+                }
+
+                if (matchFound) {
                     browserDownloadUrl = githubResponse.assets[i].browser_download_url;
                     break;
                 }
             }
+        }
+
+        if (browserDownloadUrl.trim().length === 0) {
+            throw new Error(`counldn't download terrascan ${githubResponse.tag_name}`);
         }
 
         let client = new HttpClient("terrascan-regoEditor");
@@ -86,7 +98,7 @@ export abstract class BinaryDownloader {
         });
     }
 
-    abstract downloadBinary(progress: Progress<ProgressType>, isActivateCall: boolean): Promise<boolean>;
+    abstract downloadBinary(progress: Progress<ProgressType>): Promise<boolean>;
 
     async extractTarFile(downloadedFilePath: string, binaryFolderName: string) {
         return decompress(downloadedFilePath, this.context.extensionPath + sep + 'executables' + sep + binaryFolderName, {
@@ -95,4 +107,26 @@ export abstract class BinaryDownloader {
             }
         });
     }
+}
+
+function hasOSArch(assetName: string): boolean {
+    // terrascan supports x86_64, arm64, i386 architectures
+    switch (arch()) {
+        case "arm64":
+            if (assetName.includes("arm64")) {
+                return true;
+            }
+            break;
+        case "x64":
+            if (assetName.includes("x86_64")) {
+                return true;
+            }
+            break;
+        case "x32":
+        case "ia32":
+            if (assetName.includes("i386")) {
+                return true;
+            }
+    }
+    return false;
 }

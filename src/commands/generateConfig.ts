@@ -34,7 +34,7 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
         let userAction = await window.showInformationMessage(constants.REGO_EDITOR_TOOLS_NOT_INSTALLED, constants.INSTALL_OPTION);
         if (userAction !== undefined) {
             try {
-                await new TerrascanDownloader(context).downloadWithProgress(false);
+                await new TerrascanDownloader(context).downloadWithProgress();
                 window.showInformationMessage(constants.REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS);
             } catch (error: any) {
                 window.showErrorMessage(constants.REGO_EDITOR_TOOLS_DOWNLOAD_FAILURE + error.message);

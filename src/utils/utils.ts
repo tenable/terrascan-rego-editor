@@ -57,10 +57,9 @@ export class Utils {
         return window.withProgress(progressOptions, async (progress) => {
 
             progress.report({ increment: 10 });
-            let terrascanDownload = new TerrascanDownloader(context).downloadBinary(progress, true);
 
-            return Promise.all([terrascanDownload])
-                .then(([isTerrascanDownloaded]) => {
+            return new TerrascanDownloader(context).downloadBinary(progress)
+                .then(isTerrascanDownloaded => {
                     window.showInformationMessage("Rego Editor tools downloaded successfully");
                 })
                 .catch((error) => {
