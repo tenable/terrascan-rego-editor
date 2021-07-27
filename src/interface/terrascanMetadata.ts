@@ -5,14 +5,14 @@
  * assets present in a particular release of a 
  * repository.
  */
- export interface LatestReleaseResponse {
+ export interface TerrascanRelease {
     url: string,
     assets_url: string,
     tag_name: string,
-    assets: RepoReleaseAssets[]
+    assets: ReleaseAssets[]
 }
 
-interface RepoReleaseAssets {
+interface ReleaseAssets {
     url: string,
     name: string,
     content_type: string,
