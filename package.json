@@ -18,19 +18,19 @@
 		"commands": [
 			{
 				"command": "regoeditor.generateConfig",
-				"title": "Generate Config"
+				"title": "RegoEditor: Generate Config"
 			},
 			{
 				"command": "regoeditor.generateRego",
-				"title": "Generate Rego"
+				"title": "RegoEditor: Generate Rego"
 			},
 			{
 				"command": "regoeditor.showRegoHelperTemplate",
-				"title": "Show Rego Helper Template"
+				"title": "RegoEditor: Show Rego Helper Template"
 			},
 			{
 				"command": "regoeditor.resetPolicySuffixCounter",
-				"title": "Reset Policy ID Suffix Counter"
+				"title": "RegoEditor: Reset Policy ID Suffix Counter"
 			}
 		],
 		"keybindings": [

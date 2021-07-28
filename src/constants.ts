@@ -1,6 +1,7 @@
 export const TERRASCAN_IAC_TYPES: string[] = ["cft", "k8s", "terraform", "tfplan"];
 export const IAC_TYPE_QUICK_PICK_PLACEHOLDER: string = 'Pick iac type';
 
+export const DOWNLOADING_REGO_EDITOR_TOOLS = 'Downloading RegoEditor tools';
 export const REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS = 'Rego Editor tools downloaded successfully';
 export const REGO_EDITOR_TOOLS_DOWNLOAD_FAILURE = 'Rego Editor tools download failed. ';
 

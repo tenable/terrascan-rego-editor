@@ -1,12 +1,12 @@
 import { ExtensionContext, window, workspace, Uri, ProgressOptions, ProgressLocation } from 'vscode';
 import { existsSync, writeFileSync } from 'fs';
 import { TerrascanDownloader } from '../downloader/terrascanDownloader';
-
 import { sep, join } from 'path';
 import { platform } from 'os';
 import { ParsedUri } from '../types/parsedUri';
 import * as path from "path";
 import { VariableType } from '../interface/regoElement';
+import * as constants from '../constants';
 
 export class Utils {
 
@@ -50,7 +50,7 @@ export class Utils {
 
         let progressOptions: ProgressOptions = {
             location: ProgressLocation.Notification,
-            title: "Download Rego Editor's tools",
+            title: constants.DOWNLOADING_REGO_EDITOR_TOOLS,
             cancellable: false
         };
 
