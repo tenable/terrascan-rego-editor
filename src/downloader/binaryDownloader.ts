@@ -5,6 +5,7 @@ import { sep } from "path";
 import { HttpClient } from "typed-rest-client/HttpClient";
 import { ExtensionContext, Progress, ProgressLocation, ProgressOptions, window } from "vscode";
 import { TerrascanRelease } from "../interface/terrascanMetadata";
+import * as constants from '../constants';
 
 //interface to define the type for vscode progress notification
 export interface ProgressType {
@@ -20,7 +21,7 @@ export abstract class BinaryDownloader {
     downloadWithProgress() {
         let progressOptions: ProgressOptions = {
             location: ProgressLocation.Notification,
-            title: 'Downloading Accurics tools',
+            title: constants.DOWNLOADING_REGO_EDITOR_TOOLS,
             cancellable: false
         };
 

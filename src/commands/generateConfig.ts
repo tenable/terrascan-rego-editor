@@ -52,32 +52,32 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
         terrascanLocation += '.exe';
     }
 
-    let accuricsOutputChannel: OutputChannel = window.createOutputChannel('rego-editor');
-    accuricsOutputChannel.appendLine(`Running RegoEditor...`);
-    accuricsOutputChannel.show();
+    let regoEditorOC: OutputChannel = window.createOutputChannel('rego-editor');
+    regoEditorOC.appendLine(`Running RegoEditor...`);
+    regoEditorOC.show();
 
     exec(`${terrascanLocation} scan ${scanOptions}`, (error, stdout, stderr) => {
-        accuricsOutputChannel.appendLine(`CMD : ${terrascanLocation} scan ${scanOptions}`);
+        regoEditorOC.appendLine(`CMD : ${terrascanLocation} scan ${scanOptions}`);
         let configJson: string = "";
         if (error) {
-            if (error.code === 3) {
+            if (error.code === 1) {
                 window.setStatusBarMessage('Config generated!', 2000);
-                accuricsOutputChannel.appendLine(`\nSuccess!`);
+                regoEditorOC.appendLine(`\nSuccess!`);
                 configJson = stdout;
             } else {
                 window.showErrorMessage('Config generation failed! Please check output tab for details');
-                accuricsOutputChannel.appendLine(`ERROR : ${error}`);
-                accuricsOutputChannel.appendLine(`ERROR : ${stderr}`);
+                regoEditorOC.appendLine(`ERROR : ${error}`);
+                regoEditorOC.appendLine(`ERROR : ${stderr}`);
                 return;
             }
         } else {
             if (stderr) {
                 window.showErrorMessage('Config generation failed! Please check output tab for details');
-                accuricsOutputChannel.appendLine(`ERROR : ${stderr}`);
+                regoEditorOC.appendLine(`ERROR : ${stderr}`);
                 return;
             }
             window.setStatusBarMessage('Config generated!', 2000);
-            accuricsOutputChannel.appendLine(`\nSuccess!`);
+            regoEditorOC.appendLine(`\nSuccess!`);
             configJson = stdout;
         }
         if (configJson !== "") {
