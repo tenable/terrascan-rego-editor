@@ -3,7 +3,11 @@
 	"displayName": "RegoEditor",
 	"description": "Develop custom policies for Terrascan",
 	"version": "0.0.1",
-	"publisher": "Accurics",
+	"publisher": "AccuricsInc",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/accurics/RegoEditor.git"
+	},
 	"engines": {
 		"vscode": "^1.57.0"
 	},
