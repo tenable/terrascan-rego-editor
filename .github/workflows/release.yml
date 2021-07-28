@@ -1,0 +1,53 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:  
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Tag Version
+        id: tag-version
+        run: echo ::set-output name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+        
+      - name: Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+        
+      - name: Tag & Package.json Versions Not Matching
+        if: ${{ format('v{0}', steps.package-version.outputs.current-version) != steps.tag-version.outputs.RELEASE_VERSION}}
+        run: exit 1
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.3.0
+        with:
+          node-version: 12.x
+          
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Install VSCE
+        run: npm install -g vsce
+
+      - name: Create VSIX Package
+        run: vsce package
+        
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ./regoeditor-${{ steps.package-version.outputs.current-version }}.vsix
+          draft: false
+          prerelease: true
+          
+      - name: Publish to vscode marketplace
+        run: vsce publish -p ${{ secrets.VSCE_PAT }}
