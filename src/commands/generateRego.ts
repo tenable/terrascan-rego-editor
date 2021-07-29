@@ -108,41 +108,14 @@ function buildRegoOutput(input: Map<string, RegoVariable>,context:vscode.Extensi
     output += `# This is an example for a Rego rule. The value inside the brackets [array.id] is returned if the rule evaluates to be true.\n# This rule will return the 'id' of every document in 'array' that has 'authorization' key set to "NONE"\n\n`;
 
     input.forEach((regoElement, resourceType) => {
-        output += `${resourceType}[array.id] {\n`;
+        output += `{{.prefix}}{{.name}}{{.suffix}}[array.id] {\n`;
         output += `\t# array := input.${resourceType}[_]\n`;
-        // if (regoElement.children.length > 0) {
-        //     let elm = regoElement.children[0];
-        //     output += `\t# array.config.${elm.name} == ${Utils.defaultVal(elm.type)}\n`;
-        // }
 
         regoElement.children.forEach((elem) => {
             output += `\t# array.config.${elem.name} == ${Utils.defaultVal(elem.type)}\n`;
-            // if (elem.children.length > 0) {
-            //     elem.children.forEach((child, j) => {
-            //         output += buildChildsLines(child, varName, j.toString(), varName);
-            //     });
-            // }
         });
         output += "\n}\n";
     });
-    return output;
-}
-
-function buildChildsLines(vairable: RegoVariable, variablePrefix: string, variableSuffix: string, valuePrefix: string): string {
-    let output: string = "";
-    let varName: string = variablePrefix + "_" + variableSuffix;
-
-    if (vairable.type === VariableType.array) {
-        output += `\t#${varName} := ${valuePrefix}.${vairable.name}[_]\n`;
-    } else {
-        output += `\t#${varName} := ${valuePrefix}.${vairable.name}\n`;
-    }
-
-    if (vairable.children.length > 0) {
-        vairable.children.forEach((elem, i) => {
-            output += buildChildsLines(elem, varName, i.toString(), varName);
-        });
-    }
     return output;
 }
 
@@ -187,11 +160,15 @@ function addElements(parent: RegoVariable, key: string, value: any): void {
 
 function buildMetaDataOutput(regoPath: string = "", policyType: string = "", resourceType: string = "", id: string = ""): string {
     let metaDataTemplate = `{
-        "name": "${id}",
+        "name": "policyName",
         "file": "${regoPath}",
         "policy_type": "${policyType}",
         "resource_type": "${resourceType}",
-        "template_args": null,
+        "template_args": {
+            "name":"policyName",
+            "prefix": "",
+            "suffix": ""
+        },
         "severity": "LOW",
         "description": "",
         "category": "",
