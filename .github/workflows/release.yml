@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     
     steps:  
@@ -47,7 +47,7 @@ jobs:
         with:
           files: ./regoeditor-${{ steps.package-version.outputs.current-version }}.vsix
           draft: false
-          prerelease: true
+          prerelease: false
           
       - name: Publish to vscode marketplace
         run: vsce publish -p ${{ secrets.VSCE_PAT }}
