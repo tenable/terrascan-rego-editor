@@ -4,10 +4,11 @@ import { VariableType, RegoVariable } from '../interface/regoElement';
 import * as constants from '../constants';
 import { Utils } from "../utils/utils";
 import * as os from "os";
+import { LogUtils } from "../logger/loggingHelper";
 
 
 export async function generateRego(context: vscode.ExtensionContext, uri: vscode.Uri) {
-
+    LogUtils.logMessage("Executing 'Generate Rego' command!");
     let editor = vscode.window.activeTextEditor;
 
     if (uri === undefined && editor === undefined) {
@@ -41,7 +42,8 @@ export async function generateRego(context: vscode.ExtensionContext, uri: vscode
         output = parseFileContents(content, isSelection);
 
         if (output.size !== 0) {
-            await generatePolicyFiles(uri, context,output);
+            await generatePolicyFiles(uri, context, output);
+            LogUtils.logMessage("rego generation successful");
             if (context.globalState.get("showRegoHelperTemplatePrompt", true)) {
                 regoHelperTemplatePrompt(context);
             }
@@ -71,9 +73,7 @@ function parseFileContents(content: string, isSelection: boolean): Map<string, R
     } else {
         let allResConfig: AllResourceConfig = JSON.parse(content);
         if (allResConfig) {
-            console.log(allResConfig);
             Object.entries(allResConfig).forEach((value) => {
-                console.log(value[0]);
                 let resourceConfigList = value[1];
                 if (resourceConfigList.length > 0) {
                     // for now, pick only the first element in the resource list
@@ -99,7 +99,7 @@ function parseFileContents(content: string, isSelection: boolean): Map<string, R
     return resourceTypes;
 }
 
-function buildRegoOutput(input: Map<string, RegoVariable>,context:vscode.ExtensionContext): string {
+function buildRegoOutput(input: Map<string, RegoVariable>, context: vscode.ExtensionContext): string {
     let output: string = `package accurics\n\n`;
     if (context.globalState.get("showRegoHelperTemplate", true)) {
         output += `${constants.REGO_HELPER_TEMPLATE}\n\n`;
@@ -179,9 +179,9 @@ function buildMetaDataOutput(regoPath: string = "", policyType: string = "", res
     return metaDataTemplate;
 }
 
-async function regoHelperTemplatePrompt(context:vscode.ExtensionContext) {
+async function regoHelperTemplatePrompt(context: vscode.ExtensionContext) {
     let userAction = await vscode.window.showInformationMessage(constants.REGO_HELPER_TEMPLATE_PROMPT, constants.DO_NOT_PROMPT_OPTION, constants.DISABLE_OPTION);
-    
+
     if (userAction === constants.DO_NOT_PROMPT_OPTION) {
         context.globalState.update("showRegoHelperTemplatePrompt", false);
     } else if (userAction === constants.DISABLE_OPTION) {
@@ -190,28 +190,28 @@ async function regoHelperTemplatePrompt(context:vscode.ExtensionContext) {
     }
 }
 
-async function generatePolicyFiles(uri:vscode.Uri, context:vscode.ExtensionContext,data:Map<string, RegoVariable>) {
+async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionContext, data: Map<string, RegoVariable>) {
     const parsedUri = Utils.parseUri(uri);
 
-            const resourceType = data.keys().next().value;
-            const provider = "PROVIDER";
-            let counter = context.globalState.get("policySuffixCounter", 1);
-            context.globalState.update("policySuffixCounter", counter + 1);
+    const resourceType = data.keys().next().value;
+    const provider = "PROVIDER";
+    let counter = context.globalState.get("policySuffixCounter", 1);
+    context.globalState.update("policySuffixCounter", counter + 1);
 
-            const fileName = `${os.userInfo().username.toUpperCase()}_${provider}_${Utils.leftFillNum(counter)}`;
-            let regoFileUri = Utils.writeFile(buildRegoOutput(data, context), fileName, constants.EXT_REGO, parsedUri.folderPath);
+    const fileName = `${os.userInfo().username.toUpperCase()}_${provider}_${Utils.leftFillNum(counter)}`;
+    let regoFileUri = Utils.writeFile(buildRegoOutput(data, context), fileName, constants.EXT_REGO, parsedUri.folderPath);
 
-            vscode.workspace.openTextDocument(regoFileUri).then(doc => {
-                vscode.window.showTextDocument(doc, {
-                    viewColumn: vscode.ViewColumn.Beside
-                });
-            });
+    vscode.workspace.openTextDocument(regoFileUri).then(doc => {
+        vscode.window.showTextDocument(doc, {
+            viewColumn: vscode.ViewColumn.Beside
+        });
+    });
 
-            let metaFileUri = Utils.writeFile(buildMetaDataOutput(fileName + constants.EXT_REGO, provider, resourceType, fileName), fileName, constants.EXT_JSON, parsedUri.folderPath);
+    let metaFileUri = Utils.writeFile(buildMetaDataOutput(fileName + constants.EXT_REGO, provider, resourceType, fileName), fileName, constants.EXT_JSON, parsedUri.folderPath);
 
-            vscode.workspace.openTextDocument(metaFileUri).then(doc => {
-                vscode.window.showTextDocument(doc, {
-                    viewColumn: vscode.ViewColumn.Beside
-                });
-            });
+    vscode.workspace.openTextDocument(metaFileUri).then(doc => {
+        vscode.window.showTextDocument(doc, {
+            viewColumn: vscode.ViewColumn.Beside
+        });
+    });
 }

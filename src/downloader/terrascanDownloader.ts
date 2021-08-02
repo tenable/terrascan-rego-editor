@@ -5,6 +5,7 @@ import { unlinkSync } from "fs";
 import decompress = require('decompress');
 import { BinaryDownloader, ProgressType } from "./binaryDownloader";
 import { TERRASCAN_VERSION } from "../constants";
+import { LogUtils } from "../logger/loggingHelper";
 
 export class TerrascanDownloader extends BinaryDownloader {
 
@@ -19,16 +20,20 @@ export class TerrascanDownloader extends BinaryDownloader {
     }
 
     downloadBinary(progress: Progress<ProgressType>): Promise<boolean> {
+        LogUtils.logMessage(`downloading terrascan ${TERRASCAN_VERSION}`);
         return new Promise<boolean>((resolve, reject) => {
             this.getTerrascanReleaseData(progress)
                 .then((terrascanReleases: TerrascanRelease[]) => {
                     return new Promise<TerrascanRelease>((resolve, reject) => {
                         terrascanReleases.forEach(release => {
                             if (release.tag_name === TERRASCAN_VERSION) {
+                                LogUtils.logMessage(`terrascan release ${TERRASCAN_VERSION} found`);
                                 resolve(release);
                             }
                         });
-                        reject(new Error(`Terrascan release ${TERRASCAN_VERSION} not found`));
+                        let errMessage: string = `terrascan release ${TERRASCAN_VERSION} not found`;
+                        LogUtils.logMessage(errMessage);
+                        reject(new Error(errMessage));
                     });
                 })
                 .then((latestReleaseResponse: TerrascanRelease) => {
@@ -37,6 +42,7 @@ export class TerrascanDownloader extends BinaryDownloader {
                 .then((downloadedFilePath) => {
                     this.downloadedFilePath = downloadedFilePath;
                     progress.report({ increment: 60 });
+                    LogUtils.logMessage(`extracting ${downloadedFilePath}`);
                     return this.extractTarFile(downloadedFilePath, 'terrascan');
                 })
                 .then((files: decompress.File[]) => {
@@ -45,6 +51,7 @@ export class TerrascanDownloader extends BinaryDownloader {
                     resolve(true);
                 })
                 .catch((reason: any) => {
+                    LogUtils.logMessage(`terrascan ${TERRASCAN_VERSION} download failed`);
                     reject(reason);
                 });
         });
