@@ -75,7 +75,7 @@ export class Utils {
         return new ParsedUri(filePath, folderPath, fileName);
     }
 
-    static defaultVal(type: VariableType): any {
+    static defaultVal(type: VariableType): string | number | boolean {
         switch (type) {
             case VariableType.object: return '{}';
             case VariableType.array: return '[]';
@@ -85,7 +85,7 @@ export class Utils {
         }
     }
 
-    static leftFillNum(num:number, targetLength:number=4, padChar:string="0") {
+    static leftFillNum(num: number, targetLength: number = 4, padChar: string = "0") {
         return num.toString().padStart(targetLength, padChar);
     }
 }

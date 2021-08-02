@@ -5,6 +5,7 @@ import { TerrascanDownloader } from '../downloader/terrascanDownloader';
 import { sep } from "path";
 import { exec } from "child_process";
 import * as path from "path";
+import { LogUtils } from "../logger/loggingHelper";
 
 
 export async function generateConfigCommand(context: ExtensionContext, uri: Uri) {
@@ -28,7 +29,7 @@ export async function generateConfigCommand(context: ExtensionContext, uri: Uri)
 
 // generate config json from iac files resources
 async function generateConfig(context: ExtensionContext, uri: Uri, iacType: string) {
-    console.log("Executing generateconfig command!");
+    LogUtils.logMessage("Executing 'Generate Config' command!");
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
         let userAction = await window.showInformationMessage(constants.REGO_EDITOR_TOOLS_NOT_INSTALLED, constants.INSTALL_OPTION);
@@ -52,32 +53,28 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
         terrascanLocation += '.exe';
     }
 
-    let regoEditorOC: OutputChannel = window.createOutputChannel('rego-editor');
-    regoEditorOC.appendLine(`Running RegoEditor...`);
-    regoEditorOC.show();
-
     exec(`${terrascanLocation} scan ${scanOptions}`, (error, stdout, stderr) => {
-        regoEditorOC.appendLine(`CMD : ${terrascanLocation} scan ${scanOptions}`);
+        LogUtils.logMessage(`CMD : terrascan scan ${scanOptions}`);
         let configJson: string = "";
         if (error) {
             if (error.code === 1) {
                 window.setStatusBarMessage('Config generated!', 2000);
-                regoEditorOC.appendLine(`\nSuccess!`);
+                LogUtils.logMessage("config generation successful");
                 configJson = stdout;
             } else {
                 window.showErrorMessage('Config generation failed! Please check output tab for details');
-                regoEditorOC.appendLine(`ERROR : ${error}`);
-                regoEditorOC.appendLine(`ERROR : ${stderr}`);
+                LogUtils.logMessage(`ERROR : ${error}`);
+                LogUtils.logMessage(`ERROR : ${stderr}`);
                 return;
             }
         } else {
             if (stderr) {
                 window.showErrorMessage('Config generation failed! Please check output tab for details');
-                regoEditorOC.appendLine(`ERROR : ${stderr}`);
+                LogUtils.logMessage(`ERROR : ${stderr}`);
                 return;
             }
             window.setStatusBarMessage('Config generated!', 2000);
-            regoEditorOC.appendLine(`\nSuccess!`);
+            LogUtils.logMessage("config generation successful");
             configJson = stdout;
         }
         if (configJson !== "") {

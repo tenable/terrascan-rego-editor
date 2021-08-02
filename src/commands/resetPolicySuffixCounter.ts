@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
+import { LogUtils } from '../logger/loggingHelper';
 
 export async function resetPolicySuffixCounter(context: vscode.ExtensionContext) {
-    console.log("resetPolicySuffixCounter");
-    
+    LogUtils.logMessage("Executing 'Reset Policy Suffix Counter' command!");
+
     var options: vscode.InputBoxOptions = {
         title: "Reset value",
         value: "0",
@@ -10,10 +11,11 @@ export async function resetPolicySuffixCounter(context: vscode.ExtensionContext)
         validateInput: validateInput
 
     };
-    vscode.window.showInputBox(options).then(val =>{
+    vscode.window.showInputBox(options).then(val => {
+        LogUtils.logMessage(`setting suffix counter to ${Number(val)}`);
         context.globalState.update("policySuffixCounter", Number(val));
     });
-    
+
 }
 var validateInput = (value: string): string => {
     if (!Number(value)) {
