@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { AllResourceConfig, ResourceConfig } from '../interface/terrascanMetadata';
+import { AllResourceConfig, ResourceConfig, ResourceConfigWrapper, IacMetadata } from '../interface/terrascanMetadata';
 import { VariableType, RegoVariable } from '../interface/regoElement';
 import * as constants from '../constants';
 import { Utils } from "../utils/utils";
@@ -14,97 +14,106 @@ export async function generateRego(context: vscode.ExtensionContext, uri: vscode
     if (uri === undefined && editor === undefined) {
         vscode.window.showErrorMessage("select file");
     } else {
-        let content: string = "";
-        let isSelection: boolean = false;
+        let fileContent: string = "";
+        let selectedContent: string = "";
 
+        // Identify if the user has selected any specific resource config object
         if (uri && editor) {
             if (uri.fsPath === editor.document.uri.fsPath && !editor.selection.isEmpty) {
-                content = editor.document.getText(editor.selection);
-                isSelection = true;
-            } else {
-                let contents = await vscode.workspace.fs.readFile(uri);
-                content = contents.toString();
+                selectedContent = editor.document.getText(editor.selection);
             }
-        } else if (uri) {
-            let contents = await vscode.workspace.fs.readFile(uri);
-            content = contents.toString();
         } else if (editor) {
             uri = editor.document.uri;
             if (!editor.selection.isEmpty) {
-                content = editor.document.getText(editor.selection);
-                isSelection = true;
-            } else {
-                content = editor.document.getText();
+                selectedContent = editor.document.getText(editor.selection);
             }
         }
 
+        // file content has two purpose, provide the standard config json if user do not select a 
+        // specific config object. and provide the iacMetadata
+        let contents = await vscode.workspace.fs.readFile(uri);
+        fileContent = contents.toString();
+
+        let configWrapper = {} as ResourceConfigWrapper;
+        try {
+            configWrapper = JSON.parse(fileContent);
+        } catch (e) {
+            LogUtils.logMessage(`error parsing config, ${e.message}`);
+            vscode.window.showErrorMessage(e.message);
+            return;
+        }
+
+        let isValid: boolean = validateConfig(configWrapper);
+        if (!isValid) {
+            vscode.window.showErrorMessage("selected file is not a RegoEditor generated config file!");
+            LogUtils.logMessage("selected file is not a RegoEditor generated config file!");
+            return;
+        }
+
+        let allResConfig: AllResourceConfig = configWrapper.terrascanConfig;
+
         let output: Map<string, RegoVariable> = new Map();
-        output = parseFileContents(content, isSelection);
+        if (selectedContent !== "") {
+            try {
+                let specificConfig: ResourceConfig = JSON.parse(selectedContent);
+                output = parseFileContents(allResConfig, specificConfig);
+            } catch (e) {
+                LogUtils.logMessage(`error parsing selected resource, ${e.message}`);
+                vscode.window.showErrorMessage(e.message);
+                return;
+            }
+        } else {
+            output = parseFileContents(allResConfig);
+        }
 
         if (output.size !== 0) {
-            await generatePolicyFiles(uri, context, output);
+            await generatePolicyFiles(uri, context, output, configWrapper.iacMetadata);
             LogUtils.logMessage("rego generation successful");
-            if (context.globalState.get("showRegoHelperTemplatePrompt", true)) {
+            if (context.globalState.get("showRegoHelperTemplatePrompt", true) && context.globalState.get("showRegoHelperTemplate", true)) {
                 regoHelperTemplatePrompt(context);
             }
         }
     }
 }
 
-function parseFileContents(content: string, isSelection: boolean): Map<string, RegoVariable> {
+function parseFileContents(allResConfig: AllResourceConfig, selectedResConfig?: ResourceConfig): Map<string, RegoVariable> {
     let resourceTypes: Map<string, RegoVariable> = new Map();
-    if (isSelection) {
-        try {
-            let allResConfig: ResourceConfig = JSON.parse(content);
-            let resourceConfig: ResourceConfig = allResConfig;
-            if (typeof resourceConfig !== "object") {
-                vscode.window.showErrorMessage("selected text is not a Terrascan standardized config json object");
-                return resourceTypes;
-            }
-            if (!!resourceConfig.config) {
-                let regoElem = new RegoVariable("config", VariableType.object, true, null);
-                addObjectElements(regoElem, resourceConfig.config);
-                resourceTypes.set(resourceConfig.type, regoElem);
-            }
-        } catch (e) {
-            vscode.window.showErrorMessage(e.message);
-            return resourceTypes;
-        }
+    if (!!selectedResConfig) {
+        updateResourceTypeMap(selectedResConfig, resourceTypes);
     } else {
-        let allResConfig: AllResourceConfig = JSON.parse(content);
-        if (allResConfig) {
-            Object.entries(allResConfig).forEach((value) => {
-                let resourceConfigList = value[1];
-                if (resourceConfigList.length > 0) {
-                    // for now, pick only the first element in the resource list
-                    // later we can club together the config object from each resource config
-                    let resourceConfig: ResourceConfig = resourceConfigList[0];
-                    if (typeof resourceConfig !== "object") {
-                        vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
-                        return resourceTypes;
-                    }
-                    if (!!resourceConfig.config) {
-                        let regoElem = new RegoVariable("config", VariableType.object, true, null);
-                        addObjectElements(regoElem, resourceConfig.config);
-                        resourceTypes.set(value[0], regoElem);
-                    }
-                }
-            });
-
-        } else {
-            vscode.window.showErrorMessage("selected file is not a Terrascan standardized json file");
-        }
+        Object.entries(allResConfig).forEach((value) => {
+            let resourceConfigList = value[1];
+            if (resourceConfigList.length > 0) {
+                // for now, pick only the first element in the resource list
+                // later we can club together the config object from each resource config
+                let resourceConfig: ResourceConfig = resourceConfigList[0];
+                updateResourceTypeMap(resourceConfig, resourceTypes);
+            }
+        });
     }
-
     return resourceTypes;
 }
 
-function buildRegoOutput(input: Map<string, RegoVariable>, context: vscode.ExtensionContext): string {
+function updateResourceTypeMap(resourceConfig: ResourceConfig, resourceTypes: Map<string, RegoVariable>) {
+    if (typeof resourceConfig !== "object") {
+        vscode.window.showErrorMessage("selected json is not a Terrascan standardized config json object");
+        return resourceTypes;
+    }
+    if (!!resourceConfig.config) {
+        let regoElem = new RegoVariable("config", VariableType.object, true, null);
+        addObjectElements(regoElem, resourceConfig.config);
+        resourceTypes.set(resourceConfig.type, regoElem);
+    }
+}
+
+function buildRegoOutput(input: Map<string, RegoVariable>, context: vscode.ExtensionContext, uri: vscode.Uri, iacMetadata: IacMetadata): string {
     let output: string = `package accurics\n\n`;
     if (context.globalState.get("showRegoHelperTemplate", true)) {
         output += `${constants.REGO_HELPER_TEMPLATE}\n\n`;
     }
-
+    if (!!iacMetadata) {
+        output += `#IAC_TYPE:${iacMetadata.iacType}\n#IAC_PATH:${iacMetadata.iacPath}\n\n`;
+    }
     output += `# This is an example for a Rego rule. The value inside the brackets [array.id] is returned if the rule evaluates to be true.\n# This rule will return the 'id' of every document in 'array' that has 'authorization' key set to "NONE"\n\n`;
 
     input.forEach((regoElement, resourceType) => {
@@ -186,11 +195,10 @@ async function regoHelperTemplatePrompt(context: vscode.ExtensionContext) {
         context.globalState.update("showRegoHelperTemplatePrompt", false);
     } else if (userAction === constants.DISABLE_OPTION) {
         context.globalState.update("showRegoHelperTemplate", false);
-        context.globalState.update("showRegoHelperTemplatePrompt", false);
     }
 }
 
-async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionContext, data: Map<string, RegoVariable>) {
+async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionContext, data: Map<string, RegoVariable>, iacMetadata: IacMetadata) {
     const parsedUri = Utils.parseUri(uri);
 
     const resourceType = data.keys().next().value;
@@ -199,7 +207,7 @@ async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionCon
     context.globalState.update("policySuffixCounter", counter + 1);
 
     const fileName = `${os.userInfo().username.toUpperCase()}_${provider}_${Utils.leftFillNum(counter)}`;
-    let regoFileUri = Utils.writeFile(buildRegoOutput(data, context), fileName, constants.EXT_REGO, parsedUri.folderPath);
+    let regoFileUri = Utils.writeFile(buildRegoOutput(data, context, uri, iacMetadata), fileName, constants.EXT_REGO, parsedUri.folderPath);
 
     vscode.workspace.openTextDocument(regoFileUri).then(doc => {
         vscode.window.showTextDocument(doc, {
@@ -215,3 +223,18 @@ async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionCon
         });
     });
 }
+function validateConfig(configWrapper: ResourceConfigWrapper): boolean {
+    if (configWrapper.terrascanConfig
+        && configWrapper.iacMetadata
+        && configWrapper.iacMetadata.iacPath
+        && configWrapper.iacMetadata.iacPath.trim()
+        && configWrapper.iacMetadata.iacType
+        && configWrapper.iacMetadata.iacType.trim()
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+

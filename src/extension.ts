@@ -6,6 +6,7 @@ import { showRegoHelperTemplate } from "./commands/showRegoHelperTemplate";
 import { resetPolicySuffixCounter } from "./commands/resetPolicySuffixCounter";
 import { LogUtils } from './logger/loggingHelper';
 import { RegoLogger } from './logger/regoLogger';
+import { scan } from "./commands/scan";
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -25,11 +26,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     let resetPolicySuffixCounterCommand = vscode.commands.registerCommand('regoeditor.resetPolicySuffixCounter', async () => resetPolicySuffixCounter(context));
 
+    let scanCommand = vscode.commands.registerCommand('regoeditor.scan', async (uri: vscode.Uri) => scan(context, uri));
+
     context.subscriptions.push(
         generateRegoCommand,
         generateConfigCommand,
         showRegoHelperTemplateCommand,
-        resetPolicySuffixCounterCommand
+        resetPolicySuffixCounterCommand,
+        scanCommand
     );
 }
 

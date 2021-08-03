@@ -5,7 +5,7 @@
  * assets present in a particular release of a 
  * repository.
  */
- export interface TerrascanRelease {
+export interface TerrascanRelease {
     url: string,
     assets_url: string,
     tag_name: string,
@@ -16,7 +16,7 @@ interface ReleaseAssets {
     url: string,
     name: string,
     content_type: string,
-    browser_download_url: string   
+    browser_download_url: string
 }
 
 // ResourceConfig represents individual resource config
@@ -29,4 +29,14 @@ export interface ResourceConfig {
     config: any
 }
 
+export type IacMetadata = {
+    iacType: string,
+    iacPath: string
+};
+
 export type AllResourceConfig = Record<string, ResourceConfig[]>;
+
+export interface ResourceConfigWrapper {
+    terrascanConfig: AllResourceConfig,
+    iacMetadata: IacMetadata
+}
