@@ -36,7 +36,7 @@ export async function scan(context: vscode.ExtensionContext, uri: vscode.Uri) {
     let contents = await vscode.workspace.fs.readFile(uri);
     let regoContent = contents.toString();
 
-    let pathMatch = regoContent.match(new RegExp(`${iacPathPrefix}([a-zA-Z0-9\-\\/.]*)`, "g"));
+    let pathMatch = regoContent.match(new RegExp(`${iacPathPrefix}([a-zA-Z0-9_\\-\\/.]*)`, "g"));
     let typeMatch = regoContent.match(new RegExp(`${iacTypePrefix}\\w+`, "g"));
 
     if (!pathMatch || !typeMatch) {
