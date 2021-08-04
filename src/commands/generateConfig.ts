@@ -6,6 +6,7 @@ import { sep } from "path";
 import { exec } from "child_process";
 import * as path from "path";
 import { LogUtils } from "../logger/loggingHelper";
+import stripAnsi = require("strip-ansi");
 
 
 export async function generateConfigCommand(context: ExtensionContext, uri: Uri) {
@@ -56,37 +57,50 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
     exec(`${terrascanLocation} scan ${scanOptions}`, (error, stdout, stderr) => {
         LogUtils.logMessage(`CMD : terrascan scan ${scanOptions}`);
         let configJson: string = "";
-        if (error) {
-            if (error.code === 1) {
-                window.setStatusBarMessage('Config generated!', 2000);
-                LogUtils.logMessage("config generation successful");
-                configJson = stdout;
-            } else {
-                window.showErrorMessage('Config generation failed! Please check output tab for details');
-                LogUtils.logMessage(`ERROR : ${error}`);
-                LogUtils.logMessage(`ERROR : ${stderr}`);
-                return;
-            }
+
+        // if process exits with error
+        if (!!error) {
+            window.showErrorMessage('Config generation failed!');
+            // LogUtils.logMessage(`ERROR : ${error.message}`);
+            LogUtils.logMessage(`ERROR : ${stripAnsi(stderr)}`);
+            return;
         } else {
-            if (stderr) {
-                window.showErrorMessage('Config generation failed! Please check output tab for details');
-                LogUtils.logMessage(`ERROR : ${stderr}`);
+            if (stderr && stderr.trim()) {
+                window.showErrorMessage('Config generation failed!');
+                LogUtils.logMessage(`ERROR : ${stripAnsi(stderr)}`);
                 return;
             }
-            window.setStatusBarMessage('Config generated!', 2000);
-            LogUtils.logMessage("config generation successful");
+            LogUtils.logMessage("config generation completed");
             configJson = stdout;
         }
-        if (configJson !== "") {
+
+        // check if valid resource exist in configJson
+        if (!!configJson && configJson !== "{}\n" ) {
+            let configWrapper = JSON.stringify(JSON.parse(`{
+                "terrascanConfig":${configJson},
+                "iacMetadata": {
+                    "iacType":"${iacType}",
+                    "iacPath":"${getRelativePath(uri)}"
+                }
+            }`), null, "\t");
+
             let fileName = terrascanConfigName(parsedUri.fileName, "_terrascanConfig");
-            let uri = Utils.writeFile(configJson, fileName, constants.EXT_JSON, parsedUri.folderPath);
-            workspace.openTextDocument(uri).then(doc => {
+            let configUri = Utils.writeFile(configWrapper, fileName, constants.EXT_JSON, parsedUri.folderPath);
+            workspace.openTextDocument(configUri).then(doc => {
                 window.showTextDocument(doc);
             });
+        } else {
+            window.showInformationMessage(`No resource found of type ${iacType}`);
+            LogUtils.logMessage(`No resource found of type ${iacType}`);
         }
     });
 }
 
 function terrascanConfigName(fileName: string, suffix: string): string {
     return fileName.replace(path.extname(fileName), "") + suffix;
+}
+
+function getRelativePath(uri: Uri): string {
+    const root = workspace.getWorkspaceFolder(uri)?.uri.path || "";
+    return uri.fsPath.replace(root + sep, "");
 }
