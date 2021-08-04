@@ -5,6 +5,7 @@ import * as constants from '../constants';
 import { Utils } from "../utils/utils";
 import * as os from "os";
 import { LogUtils } from "../logger/loggingHelper";
+import * as regoEditorConfig from "../utils/configuration";
 
 
 export async function generateRego(context: vscode.ExtensionContext, uri: vscode.Uri) {
@@ -69,7 +70,8 @@ export async function generateRego(context: vscode.ExtensionContext, uri: vscode
         if (output.size !== 0) {
             await generatePolicyFiles(uri, context, output, configWrapper.iacMetadata);
             LogUtils.logMessage("rego generation successful");
-            if (context.globalState.get("showRegoHelperTemplatePrompt", true) && context.globalState.get("showRegoHelperTemplate", true)) {
+
+            if (context.globalState.get("showRegoHelperTemplatePrompt", true) && regoEditorConfig.getShowHelperTemplate()) {
                 regoHelperTemplatePrompt(context);
             }
         }
@@ -108,9 +110,10 @@ function updateResourceTypeMap(resourceConfig: ResourceConfig, resourceTypes: Ma
 
 function buildRegoOutput(input: Map<string, RegoVariable>, context: vscode.ExtensionContext, uri: vscode.Uri, iacMetadata: IacMetadata): string {
     let output: string = `package accurics\n\n`;
-    if (context.globalState.get("showRegoHelperTemplate", true)) {
+    if (regoEditorConfig.getShowHelperTemplate()) {
         output += `${constants.REGO_HELPER_TEMPLATE}\n\n`;
     }
+
     if (!!iacMetadata) {
         output += `#IAC_TYPE:${iacMetadata.iacType}\n#IAC_PATH:${iacMetadata.iacPath}\n\n`;
     }
@@ -194,7 +197,7 @@ async function regoHelperTemplatePrompt(context: vscode.ExtensionContext) {
     if (userAction === constants.DO_NOT_PROMPT_OPTION) {
         context.globalState.update("showRegoHelperTemplatePrompt", false);
     } else if (userAction === constants.DISABLE_OPTION) {
-        context.globalState.update("showRegoHelperTemplate", false);
+        regoEditorConfig.setShowHelperTemplate(false);
     }
 }
 
@@ -203,8 +206,9 @@ async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionCon
 
     const resourceType = data.keys().next().value;
     const provider = "PROVIDER";
-    let counter = context.globalState.get("policySuffixCounter", 1);
-    context.globalState.update("policySuffixCounter", counter + 1);
+
+    let counter: number = regoEditorConfig.getPolicySuffixCounter();
+    regoEditorConfig.setPolicySuffixCounter(counter + 1);
 
     const fileName = `${os.userInfo().username.toUpperCase()}_${provider}_${Utils.leftFillNum(counter)}`;
     let regoFileUri = Utils.writeFile(buildRegoOutput(data, context, uri, iacMetadata), fileName, constants.EXT_REGO, parsedUri.folderPath);

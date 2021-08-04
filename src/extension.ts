@@ -2,17 +2,20 @@ import * as vscode from 'vscode';
 import { Utils } from './utils/utils';
 import { generateRego } from './commands/generateRego';
 import { generateConfigCommand as generateConfig } from "./commands/generateConfig";
-import { showRegoHelperTemplate } from "./commands/showRegoHelperTemplate";
-import { resetPolicySuffixCounter } from "./commands/resetPolicySuffixCounter";
 import { LogUtils } from './logger/loggingHelper';
 import { RegoLogger } from './logger/regoLogger';
 import { scan } from "./commands/scan";
+import { initializeStatusBarItem } from './utils/configuration';
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
 
+    // initialize extension logger
     LogUtils.setLoggerObject(new RegoLogger(context));
     LogUtils.logMessage('rego-editor activated!');
+
+    // initialize status bar item for configure command
+    initializeStatusBarItem("regoeditor.configure");
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
         Utils.downloadTools(context);
@@ -22,18 +25,17 @@ export function activate(context: vscode.ExtensionContext) {
 
     let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', async (uri: vscode.Uri) => generateRego(context, uri));
 
-    let showRegoHelperTemplateCommand = vscode.commands.registerCommand('regoeditor.showRegoHelperTemplate', async () => showRegoHelperTemplate(context));
-
-    let resetPolicySuffixCounterCommand = vscode.commands.registerCommand('regoeditor.resetPolicySuffixCounter', async () => resetPolicySuffixCounter(context));
-
     let scanCommand = vscode.commands.registerCommand('regoeditor.scan', async (uri: vscode.Uri) => scan(context, uri));
+
+    let configureCommand = vscode.commands.registerCommand("regoeditor.configure", () => {
+        vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.regoeditor');
+    });
 
     context.subscriptions.push(
         generateRegoCommand,
         generateConfigCommand,
-        showRegoHelperTemplateCommand,
-        resetPolicySuffixCounterCommand,
-        scanCommand
+        scanCommand,
+        configureCommand
     );
 }
 

@@ -29,16 +29,12 @@
 				"title": "RegoEditor: Generate Rego"
 			},
 			{
-				"command": "regoeditor.showRegoHelperTemplate",
-				"title": "RegoEditor: Show Rego Helper Template"
-			},
-			{
-				"command": "regoeditor.resetPolicySuffixCounter",
-				"title": "RegoEditor: Reset Policy ID Suffix Counter"
-			},
-			{
 				"command": "regoeditor.scan",
 				"title": "RegoEditor: Scan"
+			},
+			{
+				"command": "regoeditor.configure",
+				"title": "RegoEditor: Configuration"
 			}
 		],
 		"keybindings": [
@@ -68,7 +64,7 @@
 					"command": "regoeditor.generateRego"
 				},
 				{
-					"when": "resourceLangId == terraform || resourceLangId == yaml",
+					"when": "resourceLangId == terraform || resourceLangId == yaml || resourceLangId == json",
 					"command": "regoeditor.generateConfig"
 				},
 				{
@@ -86,16 +82,37 @@
 					"command": "regoeditor.generateConfig"
 				},
 				{
-					"command": "regoeditor.showRegoHelperTemplate"
-				},
-				{
-					"command": "regoeditor.resetPolicySuffixCounter"
-				},
-				{
 					"when": "resourceLangId == rego",
 					"command": "regoeditor.scan"
+				},
+				{
+					"command": "regoeditor.configure"
 				}
 			]
+		},
+		"configuration": {
+			"type": "object",
+			"title": "Rego Editor",
+			"properties": {
+				"regoeditor.targetEnv": {
+					"type": "string",
+					"description": "Accurics environment URL"
+				},
+				"regoeditor.appToken": {
+					"type": "string",
+					"description": "App token created for your Accurics account"
+				},
+				"regoeditor.showRegoHelperTemplate": {
+					"type": "boolean",
+					"description": "Enable/disable helper text template in rego file",
+					"default": true
+				},
+				"regoeditor.policySuffixCounter": {
+					"type": "integer",
+					"description": "Policy suffix counter",
+					"default": 1
+				}
+			}
 		}
 	},
 	"scripts": {
