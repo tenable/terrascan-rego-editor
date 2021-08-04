@@ -75,7 +75,7 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
         }
 
         // check if valid resource exist in configJson
-        if (!!configJson && configJson !== "{}\n" ) {
+        if (!!configJson && configJson !== "{}\n") {
             let configWrapper = JSON.stringify(JSON.parse(`{
                 "terrascanConfig":${configJson},
                 "iacMetadata": {

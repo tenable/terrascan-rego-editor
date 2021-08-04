@@ -52,7 +52,7 @@ export async function scan(context: vscode.ExtensionContext, uri: vscode.Uri) {
 
     const parsedUri = Utils.parseUri(uri);
     let iacAbsolutePath = path.join(workspace, iacMetadata.iacPath);
-    let scanOptions = `-i ${iacMetadata.iacType} -f ${iacAbsolutePath} -p ${parsedUri.folderPath} -o json --scan-rules="${parsedUri.fileName.replace(".rego","")}"`;
+    let scanOptions = `-i ${iacMetadata.iacType} -f ${iacAbsolutePath} -p ${parsedUri.folderPath} -o json --scan-rules="${parsedUri.fileName.replace(".rego", "")}"`;
 
     let terrascanLocation: string = context.extensionPath + sep + 'executables' + sep + 'terrascan' + sep + 'terrascan';
     if (Utils.isWindowsPlatform()) {
@@ -89,7 +89,7 @@ export async function scan(context: vscode.ExtensionContext, uri: vscode.Uri) {
                 LogUtils.logMessage(`ERROR : ${stripAnsi(stderr)}`);
             } else {
                 vscode.window.setStatusBarMessage('Scan succesful!', 2000);
-                LogUtils.logMessage(`Scan completed successful!`);  
+                LogUtils.logMessage(`Scan completed successful!`);
             }
             response = stdout;
         }
