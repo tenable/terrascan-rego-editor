@@ -6,6 +6,7 @@ import { LogUtils } from './logger/loggingHelper';
 import { RegoLogger } from './logger/regoLogger';
 import { scan } from "./commands/scan";
 import { initializeStatusBarItem } from './utils/configuration';
+import { syncCmd } from './commands/syncCommand';
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -31,11 +32,14 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.regoeditor');
     });
 
+    let syncCommand = vscode.commands.registerCommand('regoeditor.sync', async (uri: vscode.Uri) => syncCmd(uri));
+
     context.subscriptions.push(
         generateRegoCommand,
         generateConfigCommand,
         scanCommand,
-        configureCommand
+        configureCommand,
+        syncCommand
     );
 }
 
