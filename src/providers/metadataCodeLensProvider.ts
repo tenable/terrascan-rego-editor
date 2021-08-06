@@ -8,7 +8,7 @@ export class MetadataCodeLensProvider implements CodeLensProvider {
         const text = document.getText();
 
         if (this.parseJSON(text)) {
-            const range = document.lineAt(1).range;
+            const range = document.lineAt(0).range;
             let command: Command = {
                 title: "Sync",
                 tooltip: "Sync rule to Accurics backend",
