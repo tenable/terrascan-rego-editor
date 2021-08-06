@@ -7,6 +7,7 @@ import { RegoLogger } from './logger/regoLogger';
 import { scan } from "./commands/scan";
 import { initializeStatusBarItem } from './utils/configuration';
 import { syncCmd } from './commands/syncCommand';
+import { MetadataCodeLensProvider } from './providers/metadataCodeLensProvider';
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -41,6 +42,9 @@ export function activate(context: vscode.ExtensionContext) {
         configureCommand,
         syncCommand
     );
+
+    const medataCodeLensProvider: MetadataCodeLensProvider = new MetadataCodeLensProvider();
+    vscode.languages.registerCodeLensProvider("json", medataCodeLensProvider);
 }
 
 // this method is called when the extension is deactivated
