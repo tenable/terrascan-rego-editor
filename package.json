@@ -38,7 +38,8 @@
 			},
 			{
 				"command": "regoeditor.sync",
-				"title": "RegoEditor: Sync"
+				"title": "RegoEditor: Sync",
+				"icon": "assets/terrascan.png"
 			}
 		],
 		"keybindings": [
@@ -52,6 +53,17 @@
 			}
 		],
 		"menus": {
+			"view/title": [
+				{
+					"command": "regoeditor.sync"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "regoeditor.configure",
+					"group": "1"
+				}
+			],
 			"explorer/context": [
 				{
 					"when": "resourceLangId == json",
@@ -129,7 +141,52 @@
 					"default": 1
 				}
 			}
-		}
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "regoeditor",
+					"title": "Rego Editor",
+					"icon": "assets/terrascan.png"
+				}
+			]
+		},
+		"views": {
+			"regoeditor": [
+				{
+					"id": "regoeditor.views.environment",
+					"icon": "assets/terrascan_logo.jpg",
+					"name": "Connected Environment",
+					"when": "config.regoeditor.targetEnv != '' && config.regoeditor.appToken != ''",
+					"visibility": "visible"
+				},
+				{
+					"id": "regoeditor.views.policies",
+					"icon": "assets/terrascan_logo.jpg",
+					"name": "Policies",
+					"type": "tree",
+					"when": "config.regoeditor.targetEnv != '' && config.regoeditor.appToken != ''",
+					"visibility": "visible"
+				},
+				{
+					"id": "regoeditor.views.welcome",
+					"icon": "assets/terrascan_logo.jpg",
+					"name": "Welcome",
+					"when": "config.regoeditor.targetEnv == '' || config.regoeditor.appToken == ''",
+					"visibility": "visible"
+				}
+			]
+		},
+		"viewsWelcome": [
+			{
+				"view": "regoeditor.views.welcome",
+				"contents": "In order to use RegoEditor with Accurics, you need to link your Accurics account with RegoEditor\n\n"
+			},
+			{
+				"view": "regoeditor.views.welcome",
+				"contents": "[Link Accurics](command:regoeditor.configure \"Accurics Configurations\")"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

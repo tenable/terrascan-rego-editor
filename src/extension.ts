@@ -9,6 +9,8 @@ import { initializeStatusBarItem } from './utils/configuration';
 import { syncCmd } from './commands/syncCommand';
 import { MetadataCodeLensProvider } from './providers/metadataCodeLensProvider';
 import { COMMAND_CONFIGURE, COMMAND_GENERATE_CONFIG, COMMAND_GENERATE_REGO, COMMAND_SCAN, COMMAND_SYNC } from './constants';
+import { getPolicyDataProvider } from "./providers/PolicyDataProvider";
+import { getEnvironmentDataProvider } from "./providers/EnvironmentDataProvider";
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -46,6 +48,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const medataCodeLensProvider: MetadataCodeLensProvider = new MetadataCodeLensProvider();
     vscode.languages.registerCodeLensProvider("json", medataCodeLensProvider);
+
+    vscode.window.registerTreeDataProvider('regoeditor.views.policies', getPolicyDataProvider());
+    vscode.window.registerTreeDataProvider('regoeditor.views.environment', getEnvironmentDataProvider());
+
 }
 
 // this method is called when the extension is deactivated
