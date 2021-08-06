@@ -188,7 +188,7 @@ function buildMetaDataOutput(regoPath: string = "", policyType: string = "", res
         "id": "${id}"
     }`;
 
-    return metaDataTemplate;
+    return JSON.stringify(JSON.parse(metaDataTemplate), null, "\t");
 }
 
 async function regoHelperTemplatePrompt(context: vscode.ExtensionContext) {

@@ -60,6 +60,10 @@
 				{
 					"when": "resourceLangId == terraform || resourceLangId == yaml || resourceLangId == json",
 					"command": "regoeditor.generateConfig"
+				},
+				{
+					"when": "resourceLangId == json && config.editor.codeLens == false",
+					"command": "regoeditor.sync"
 				}
 			],
 			"editor/context": [
@@ -74,6 +78,10 @@
 				{
 					"when": "resourceLangId == rego",
 					"command": "regoeditor.scan"
+				},
+				{
+					"when": "resourceLangId == json && config.editor.codeLens == false",
+					"command": "regoeditor.sync"
 				}
 			],
 			"commandPalette": [
