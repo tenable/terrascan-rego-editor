@@ -4,7 +4,7 @@ import { HttpClient } from "typed-rest-client/HttpClient";
 import { IHeaders, IRequestOptions } from "typed-rest-client/Interfaces";
 import * as regoEditorConfig from "../utils/configuration";
 import { BackendPolicyObject } from "../interface/backendMetadata";
-import { MetadataJSON } from "../interface/terrascanMetadata";
+import { isValidMetadataJSON, MetadataJSON } from "../interface/terrascanMetadata";
 import { existsSync } from "fs";
 import { LogUtils } from "../logger/loggingHelper";
 
@@ -52,6 +52,17 @@ export async function syncCmd(uri: vscode.Uri) {
     } else {
         vscode.window.showErrorMessage("no file selected");
         return;
+    }
+
+    // Metadata JSON validation would be required if code lens is not enabled by the user
+    // if code lens is enabled, metadata JSON validation would be done by the code lens provider
+    let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("editor");
+    let codeLensVal: boolean | undefined = <boolean>editorConfig.get("codeLens");
+    if (codeLensVal !== undefined && !codeLensVal) {
+        if (!isValidMetadataJSON(metadataFileContents)) {
+            vscode.window.showErrorMessage("selected file is not a valid 'Terrascan Rule Metadata' json file");
+            return;
+        }
     }
 
     LogUtils.logMessage(`parsing metadata contents of file: ${uri.fsPath}`);
