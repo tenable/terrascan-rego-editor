@@ -59,3 +59,23 @@ export interface MetadataJSON {
     version: string,
     id: string
 };
+
+export function isValidMetadataJSON(data: string): boolean {
+    try {
+        let obj = <MetadataJSON>JSON.parse(data);
+        if (obj.name && typeof obj.name === "string" &&
+            obj.file && typeof obj.file === "string" &&
+            obj.policy_type && typeof obj.policy_type === "string" &&
+            obj.resource_type && typeof obj.resource_type === "string" &&
+            obj.template_args && typeof obj.template_args === "object" &&
+            obj.severity && typeof obj.severity === "string" &&
+            obj.version && typeof obj.version === "number" &&
+            obj.id && typeof obj.id === "string") {
+            return true;
+        }
+        return false;
+    }
+    catch (e) {
+        return false;
+    }
+};
