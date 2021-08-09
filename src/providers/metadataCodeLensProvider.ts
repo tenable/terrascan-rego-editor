@@ -19,7 +19,7 @@ export class MetadataCodeLensProvider implements CodeLensProvider {
                         title: "Sync",
                         tooltip: "Sync rule to Accurics backend",
                         command: COMMAND_SYNC,
-                        arguments: [document.uri]
+                        arguments: [document.uri, true]
                     };
                     blocks.push(new CodeLens(line.range, command));
                     break;

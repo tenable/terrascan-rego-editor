@@ -99,6 +99,10 @@
 				},
 				{
 					"command": "regoeditor.configure"
+				},
+				{
+					"when": "resourceLangId == json",
+					"command": "regoeditor.sync"
 				}
 			]
 		},

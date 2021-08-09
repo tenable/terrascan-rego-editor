@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.regoeditor');
     });
 
-    let syncCommand = vscode.commands.registerCommand(COMMAND_SYNC, async (uri: vscode.Uri) => syncCmd(uri));
+    let syncCommand = vscode.commands.registerCommand(COMMAND_SYNC, async (uri: vscode.Uri) => syncCmd(uri, false));
 
     context.subscriptions.push(
         generateRegoCommand,

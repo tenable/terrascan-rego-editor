@@ -8,7 +8,7 @@ import { isValidMetadataJSON, MetadataJSON } from "../interface/terrascanMetadat
 import { existsSync } from "fs";
 import { LogUtils } from "../logger/loggingHelper";
 
-export async function syncCmd(uri: vscode.Uri) {
+export async function syncCmd(uri: vscode.Uri, isCodeLensCall: boolean) {
     const ruleUpdateEndPoint: string = "/v1/api/rule/update";
 
     let targetEnv: string = regoEditorConfig.getTargetEnv();
@@ -56,9 +56,7 @@ export async function syncCmd(uri: vscode.Uri) {
 
     // Metadata JSON validation would be required if code lens is not enabled by the user
     // if code lens is enabled, metadata JSON validation would be done by the code lens provider
-    let editorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("editor");
-    let codeLensVal: boolean | undefined = <boolean>editorConfig.get("codeLens");
-    if (codeLensVal !== undefined && !codeLensVal) {
+    if (!isCodeLensCall) {
         if (!isValidMetadataJSON(metadataFileContents)) {
             vscode.window.showErrorMessage("selected file is not a valid 'Terrascan Rule Metadata' json file");
             return;
