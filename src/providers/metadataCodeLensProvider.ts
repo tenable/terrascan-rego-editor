@@ -1,4 +1,5 @@
-import { CancellationToken, CodeLens, CodeLensProvider, TextDocument, Command } from "vscode";
+import { CancellationToken, CodeLens, CodeLensProvider, TextDocument, Command, TextLine } from "vscode";
+import { COMMAND_SYNC } from "../constants";
 import { MetadataJSON } from "../interface/terrascanMetadata";
 
 export class MetadataCodeLensProvider implements CodeLensProvider {
@@ -8,14 +9,22 @@ export class MetadataCodeLensProvider implements CodeLensProvider {
         const text = document.getText();
 
         if (this.parseJSON(text)) {
-            const range = document.lineAt(0).range;
-            let command: Command = {
-                title: "Sync",
-                tooltip: "Sync rule to Accurics backend",
-                command: "regoeditor.sync",
-                arguments: [document.uri]
-            };
-            blocks.push(new CodeLens(range, command));
+            for (let i = 0; i < document.lineCount; i++) {
+                if (document.lineAt(i).isEmptyOrWhitespace) {
+                    continue;
+                }
+                let line: TextLine = document.lineAt(i);
+                if (line.text.charAt(line.firstNonWhitespaceCharacterIndex) === "{") {
+                    let command: Command = {
+                        title: "Sync",
+                        tooltip: "Sync rule to Accurics backend",
+                        command: COMMAND_SYNC,
+                        arguments: [document.uri]
+                    };
+                    blocks.push(new CodeLens(line.range, command));
+                    break;
+                }
+            }
         }
         return Promise.resolve(blocks);
     }

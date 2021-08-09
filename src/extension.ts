@@ -8,6 +8,7 @@ import { scan } from "./commands/scan";
 import { initializeStatusBarItem } from './utils/configuration';
 import { syncCmd } from './commands/syncCommand';
 import { MetadataCodeLensProvider } from './providers/metadataCodeLensProvider';
+import { COMMAND_CONFIGURE, COMMAND_GENERATE_CONFIG, COMMAND_GENERATE_REGO, COMMAND_SCAN, COMMAND_SYNC } from './constants';
 
 // this method is called when the extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -17,23 +18,23 @@ export function activate(context: vscode.ExtensionContext) {
     LogUtils.logMessage('rego-editor activated!');
 
     // initialize status bar item for configure command
-    initializeStatusBarItem("regoeditor.configure");
+    initializeStatusBarItem(COMMAND_CONFIGURE);
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
         Utils.downloadTools(context);
     }
 
-    let generateConfigCommand = vscode.commands.registerCommand('regoeditor.generateConfig', async (uri: vscode.Uri) => generateConfig(context, uri));
+    let generateConfigCommand = vscode.commands.registerCommand(COMMAND_GENERATE_CONFIG, async (uri: vscode.Uri) => generateConfig(context, uri));
 
-    let generateRegoCommand = vscode.commands.registerCommand('regoeditor.generateRego', async (uri: vscode.Uri) => generateRego(context, uri));
+    let generateRegoCommand = vscode.commands.registerCommand(COMMAND_GENERATE_REGO, async (uri: vscode.Uri) => generateRego(context, uri));
 
-    let scanCommand = vscode.commands.registerCommand('regoeditor.scan', async (uri: vscode.Uri) => scan(context, uri));
+    let scanCommand = vscode.commands.registerCommand(COMMAND_SCAN, async (uri: vscode.Uri) => scan(context, uri));
 
-    let configureCommand = vscode.commands.registerCommand("regoeditor.configure", () => {
+    let configureCommand = vscode.commands.registerCommand(COMMAND_CONFIGURE, () => {
         vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.regoeditor');
     });
 
-    let syncCommand = vscode.commands.registerCommand('regoeditor.sync', async (uri: vscode.Uri) => syncCmd(uri));
+    let syncCommand = vscode.commands.registerCommand(COMMAND_SYNC, async (uri: vscode.Uri) => syncCmd(uri));
 
     context.subscriptions.push(
         generateRegoCommand,
