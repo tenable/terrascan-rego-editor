@@ -1,28 +1,19 @@
 import * as vscode from "vscode";
 import { sep } from "path";
-import { HttpClient } from "typed-rest-client/HttpClient";
-import { IHeaders, IRequestOptions } from "typed-rest-client/Interfaces";
 import * as regoEditorConfig from "../utils/configuration";
 import { BackendPolicyObject } from "../interface/backendMetadata";
 import { isValidMetadataJSON, MetadataJSON } from "../interface/terrascanMetadata";
 import { existsSync } from "fs";
 import { LogUtils } from "../logger/loggingHelper";
+import { BackendClient } from "./backendClient";
 
 export async function syncCmd(uri: vscode.Uri, isCodeLensCall: boolean) {
-    const ruleUpdateEndPoint: string = "/v1/api/rule/update";
+    if (!regoEditorConfig.isBackendConfigValid()) {
+        return;
+    }
 
     let targetEnv: string = regoEditorConfig.getTargetEnv();
     let appToken: string = regoEditorConfig.getApplicationToken();
-
-    if (!(targetEnv || targetEnv.trim())) {
-        vscode.window.showErrorMessage("Target Environment not configured. Please run 'RegoEditor: Configuration' command to set target environment");
-        return;
-    }
-
-    if (!(appToken || appToken.trim())) {
-        vscode.window.showErrorMessage("Application Token not configured. Please run 'RegoEditor: Configuration' command to set App Token");
-        return;
-    }
 
     let editor = vscode.window.activeTextEditor;
 
@@ -101,41 +92,6 @@ export async function syncCmd(uri: vscode.Uri, isCodeLensCall: boolean) {
 
     let arr: BackendPolicyObject[] = [backendObj];
 
-    let headers: IHeaders = {
-        "Authorization": "Bearer " + appToken
-    };
-
-    LogUtils.logMessage("sending http request to Accurics backend");
-
-    let client = new HttpClient("rego-editor");
-    client.post(targetEnv + ruleUpdateEndPoint, JSON.stringify(arr), headers)
-        .then((response) => {
-            let respMsg = response.message;
-            respMsg = respMsg.setTimeout(10000, () => {
-                throw new Error("request timed out after 10 seconds, please check if target environment is up.");
-            });
-
-            // handle different status codes valid for Accurics backend
-            switch (respMsg.statusCode) {
-                case 200:
-                case 400:
-                    // we need to read the body in case of a bad request
-                    return response.readBody();
-                case 401:
-                    throw new Error(`please make sure the 'App Token' is valid, response code: ${respMsg.statusCode},error message: ${respMsg.statusMessage}`);
-                default:
-                    throw new Error(`unable to upload rule, response code: ${respMsg.statusCode}, error message: ${respMsg.statusMessage}`);
-            }
-        }).then(data => {
-            if (data.includes("400")) {
-                LogUtils.logMessage(`rule upload to Accurics backend failed, error: ${data}`);
-                vscode.window.showErrorMessage(`rule upload failed, response: ${data}`);
-            } else {
-                LogUtils.logMessage(`rule uploaded to Accurics backend successfully, output: ${data}`);
-                vscode.window.showInformationMessage(`rule upload successful, response: ${data}`);
-            }
-        }).catch((error) => {
-            LogUtils.logMessage(`rule upload to Accurics backend failed, error: ${error.message}`);
-            vscode.window.showErrorMessage(`error while connecting to '${targetEnv}', error: ${error.message}`);
-        });
+    let backendClient: BackendClient = new BackendClient(targetEnv, appToken);
+    backendClient.pushRules(arr);
 }

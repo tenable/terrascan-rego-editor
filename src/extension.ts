@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let downloadPolicyCommand = vscode.commands.registerCommand(COMMAND_DOWNLOAD_POLICY, async (policy: Policy) => downloadPolicy(policy));
 
-    let fetchAllCommand = vscode.commands.registerCommand(COMMAND_FETCH_ALL_CUSTOM_RULES, async () => policyProvider.refresh());
+    let fetchAllCommand = vscode.commands.registerCommand(COMMAND_FETCH_ALL_CUSTOM_RULES, async () => policyProvider.fetch());
 
     context.subscriptions.push(
         generateRegoCommand,

@@ -10,7 +10,7 @@ export class PolicyDataProvider implements vscode.TreeDataProvider<Policy> {
 
     constructor(public context: vscode.ExtensionContext) { }
 
-    refresh(): void {
+    fetch(): void {
         this._onDidChangeTreeData.fire();
     }
 

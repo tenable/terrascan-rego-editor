@@ -3,9 +3,13 @@ import { Policy } from "../providers/PolicyDataProvider";
 import { Utils } from "../utils/utils";
 import * as vscode from "vscode";
 import { EXT_JSON, EXT_REGO } from "../constants";
+import { LogUtils } from "../logger/loggingHelper";
 
 export async function downloadPolicy(policy: Policy) {
-    let metaJSON: MetadataJSON = {
+
+    LogUtils.logMessage("Executing 'Download' command!");
+
+    let ruleMetadata: MetadataJSON = {
         category: policy.policyObj.category!,
         description: policy.policyObj.ruleDisplayName!,
         file: policy.policyObj.ruleName + ".rego",
@@ -16,13 +20,14 @@ export async function downloadPolicy(policy: Policy) {
         resource_type: policy.policyObj.resourceType,
         severity: policy.policyObj.severity,
         template_args: {
-            name: "",
+            name: policy.policyObj.ruleName,
             prefix: "",
             suffix: ""
         },
         version: String(policy.policyObj.version)
     };
-    let configUri = Utils.writeFile(JSON.stringify(metaJSON), policy.policyObj.ruleName, EXT_JSON, vscode.workspace.workspaceFolders![0].uri.fsPath);
+
+    let configUri = Utils.writeFile(JSON.stringify(ruleMetadata), policy.policyObj.ruleName, EXT_JSON, vscode.workspace.workspaceFolders![0].uri.fsPath);
 
     vscode.workspace.openTextDocument(configUri).then(doc => {
         vscode.window.showTextDocument(doc, {
