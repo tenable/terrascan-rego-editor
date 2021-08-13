@@ -96,6 +96,7 @@ export async function syncCmd(uri: vscode.Uri, isCodeLensCall: boolean) {
         engineType: "terraform",
         vulnerability: "vulnerability",
         policy: "custom policy by Rego Editor extension",
+        custom: true
     };
 
     let arr: BackendPolicyObject[] = [backendObj];

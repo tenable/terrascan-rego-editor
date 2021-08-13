@@ -37,3 +37,5 @@ export const COMMAND_GENERATE_REGO = "regoeditor.generateRego";
 export const COMMAND_SCAN = "regoeditor.scan";
 export const COMMAND_CONFIGURE = "regoeditor.configure";
 export const COMMAND_SYNC = "regoeditor.sync";
+export const COMMAND_DOWNLOAD_POLICY = "regoeditor.download";
+export const COMMAND_FETCH_ALL_CUSTOM_RULES = "regoeditor.fetchall";

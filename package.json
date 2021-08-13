@@ -38,8 +38,23 @@
 			},
 			{
 				"command": "regoeditor.sync",
-				"title": "RegoEditor: Sync",
-				"icon": "assets/terrascan.png"
+				"title": "RegoEditor: Sync"
+			},
+			{
+				"command": "regoeditor.download",
+				"title": "RegoEditor: Download",
+				"icon": {
+					"dark": "assets/download.svg",
+					"light": "assets/download.svg"
+				}
+			},
+			{
+				"command": "regoeditor.fetchall",
+				"title": "RegoEditor: Fetch All Policies",
+				"icon": {
+					"dark": "assets/dark/refresh.svg",
+					"light": "assets/light/refresh.svg"
+				}
 			}
 		],
 		"keybindings": [
@@ -55,13 +70,16 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "regoeditor.sync"
+					"command": "regoeditor.fetchall",
+					"when": "view == regoeditor.views.policies",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "regoeditor.configure",
-					"group": "1"
+					"command": "regoeditor.download",
+					"when": "view == regoeditor.views.policies && viewItem == policy",
+					"group": "inline"
 				}
 			],
 			"explorer/context": [
@@ -115,6 +133,14 @@
 				{
 					"when": "resourceLangId == json",
 					"command": "regoeditor.sync"
+				},
+				{
+					"when": "false",
+					"command": "regoeditor.download"
+				},
+				{
+					"when": "false",
+					"command": "regoeditor.fetchall"
 				}
 			]
 		},
@@ -154,13 +180,6 @@
 		"views": {
 			"regoeditor": [
 				{
-					"id": "regoeditor.views.environment",
-					"icon": "assets/terrascan_logo.jpg",
-					"name": "Connected Environment",
-					"when": "config.regoeditor.targetEnv != '' && config.regoeditor.appToken != ''",
-					"visibility": "visible"
-				},
-				{
 					"id": "regoeditor.views.policies",
 					"icon": "assets/terrascan_logo.jpg",
 					"name": "Policies",
@@ -180,11 +199,7 @@
 		"viewsWelcome": [
 			{
 				"view": "regoeditor.views.welcome",
-				"contents": "In order to use RegoEditor with Accurics, you need to link your Accurics account with RegoEditor\n\n"
-			},
-			{
-				"view": "regoeditor.views.welcome",
-				"contents": "[Link Accurics](command:regoeditor.configure \"Accurics Configurations\")"
+				"contents": "In order to use RegoEditor with Accurics, you need to configure your Accurics account with RegoEditor\n\n[Configure Accurics](command:regoeditor.configure \"Accurics Configurations\")"
 			}
 		]
 	},
