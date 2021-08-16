@@ -38,3 +38,20 @@ export function initializeStatusBarItem(command: string): void {
     statusBarItem.text = rootConfig;
     statusBarItem.show();
 };
+
+export function isBackendConfigValid(): boolean {
+    let targetEnv: string = getTargetEnv();
+    let appToken: string = getApplicationToken();
+
+    if (!(targetEnv || targetEnv.trim())) {
+        vscode.window.showErrorMessage("Target Environment not configured. Please run 'RegoEditor: Configuration' command to set target environment");
+        return false;
+    }
+
+    if (!(appToken || appToken.trim())) {
+        vscode.window.showErrorMessage("Application Token not configured. Please run 'RegoEditor: Configuration' command to set App Token");
+        return false;
+    }
+
+    return true;
+}
