@@ -43,18 +43,12 @@
 			{
 				"command": "regoeditor.download",
 				"title": "RegoEditor: Download",
-				"icon": {
-					"dark": "assets/download.svg",
-					"light": "assets/download.svg"
-				}
+				"icon": "$(cloud-download)"
 			},
 			{
 				"command": "regoeditor.fetchall",
 				"title": "RegoEditor: Fetch All Policies",
-				"icon": {
-					"dark": "assets/dark/refresh.svg",
-					"light": "assets/light/refresh.svg"
-				}
+				"icon": "$(refresh)"
 			}
 		],
 		"keybindings": [
