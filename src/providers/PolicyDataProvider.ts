@@ -96,7 +96,7 @@ export class PolicyType extends PolicyData {
     }
 
     addChildren(children: Policy[]) {
-        this.children = children;
+        this.children.push(...children);
     }
 
     getChildren(): Policy[] {
