@@ -47,17 +47,19 @@ export interface MetadataJSON {
     file: string,
     policy_type: string,
     resource_type: string,
-    template_args: {
-        name: string,
-        prefix: string,
-        suffix: string
-    },
+    template_args: TemplateArg,
     severity: string,
     description: string,
     reference_id: string,
     category: string,
-    version: string,
+    version: number,
     id: string
+};
+
+export type TemplateArg = {
+    name: string,
+    prefix: string,
+    suffix: string
 };
 
 export function isValidMetadataJSON(data: string): boolean {

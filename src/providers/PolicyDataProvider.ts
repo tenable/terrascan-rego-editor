@@ -1,12 +1,17 @@
 import * as vscode from 'vscode';
-import { sep } from 'path';
 import { fetchAllCustomRules } from '../commands/fetchCustomRules';
 import { BackendPolicyObject } from '../interface/backendMetadata';
 
-export class PolicyDataProvider implements vscode.TreeDataProvider<Policy> {
-    private _onDidChangeTreeData: vscode.EventEmitter<Policy | undefined | void> = new vscode.EventEmitter<Policy | undefined | void>();
+const CONTEXT_VALUE_PROVIDER = "provider";
+const CONTEXT_VALUE_POLICY = "policy";
 
-    readonly onDidChangeTreeData: vscode.Event<Policy | undefined | void> = this._onDidChangeTreeData.event;
+// VS Code built-in icon, Refer https://code.visualstudio.com/api/references/icons-in-labels for more built-in icons
+const POLICY_ICON = "shield";
+
+export class PolicyDataProvider implements vscode.TreeDataProvider<PolicyData> {
+    private _onDidChangeTreeData: vscode.EventEmitter<PolicyData | undefined | void> = new vscode.EventEmitter<PolicyData | undefined | void>();
+
+    readonly onDidChangeTreeData: vscode.Event<PolicyData | undefined | void> = this._onDidChangeTreeData.event;
 
     constructor(public context: vscode.ExtensionContext) { }
 
@@ -14,57 +19,89 @@ export class PolicyDataProvider implements vscode.TreeDataProvider<Policy> {
         this._onDidChangeTreeData.fire();
     }
 
-    getTreeItem(element: Policy): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: PolicyData): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
 
-    async getChildren(element?: Policy | undefined): Promise<Policy[]> {
+    async getChildren(element?: PolicyData | undefined): Promise<PolicyData[]> {
         if (element) {
+            if (element instanceof PolicyType) {
+                return element.getChildren();
+            }
             return [];
         }
 
-        let arrPolicyItem: Policy[] = [];
-
         let allRules = await fetchAllCustomRules();
+
+        let providers: PolicyType[] = [];
         if (allRules && allRules.length > 0) {
-            allRules.forEach(rule => {
-                let p: Policy = new Policy({
-                    engineType: rule.engineType,
-                    policy: rule.policy,
-                    provider: rule.provider,
-                    resourceType: rule.resourceType,
-                    ruleName: rule.ruleName,
-                    ruleTemplate: rule.ruleTemplate,
-                    severity: rule.severity,
-                    vulnerability: rule.vulnerability
-                }, this.context);
-                arrPolicyItem.push(p);
+            let group = allRules.reduce((m, r) => {
+                m.set(r.provider, [...m.get(r.provider) || [],
+                new Policy(r, this.context)
+                ]);
+                return m;
+            }, new Map<String, Policy[]>());
+
+            group.forEach((v, k) => {
+                let provider = new PolicyType(k.toString(), this.context);
+                provider.addChildren(v);
+                providers.push(provider);
             });
         }
 
-        if (arrPolicyItem.length > 0) {
-            return arrPolicyItem;
-        }
-        return [];
+        return providers;
     }
 }
 
-const lightPolicyImage = "assets" + sep + "light" + sep + "dependency.svg";
-const darkPolicyImage = "assets" + sep + "dark" + sep + "dependency.svg";
+export abstract class PolicyData extends vscode.TreeItem {
 
-export class Policy extends vscode.TreeItem {
+    constructor(public name: string, contextValue: string, collapsable: vscode.TreeItemCollapsibleState) {
+        super(name, collapsable);
+        this.contextValue = contextValue;
+    }
+
+    abstract getChildren(): PolicyData[];
+    abstract addChildren(children: PolicyData[]): void;
+
+}
+
+export class Policy extends PolicyData {
 
     constructor(public policyObj: BackendPolicyObject, public context: vscode.ExtensionContext) {
-        super(policyObj.ruleName, vscode.TreeItemCollapsibleState.None);
+        super(policyObj.ruleName, CONTEXT_VALUE_POLICY, vscode.TreeItemCollapsibleState.None);
         this.description = policyObj.ruleDisplayName;
-        this.contextValue = "policy";
-        this.iconPath = {
-            light: this.context.extensionUri.fsPath + sep + lightPolicyImage,
-            dark: this.context.extensionUri.fsPath + sep + darkPolicyImage
-        };
+        this.iconPath = new vscode.ThemeIcon(POLICY_ICON);
     }
 
     getLabel(): string | vscode.TreeItemLabel | undefined {
         return this.label;
     }
+
+    addChildren(children: Policy[]) {
+        return;
+    }
+
+    getChildren(): Policy[] {
+        return [];
+    }
 }
+
+export class PolicyType extends PolicyData {
+    children: Policy[] = [];
+
+    constructor(public policyType: string, public context: vscode.ExtensionContext) {
+        super(policyType, CONTEXT_VALUE_PROVIDER, vscode.TreeItemCollapsibleState.Collapsed);
+        this.description = `Policies for type ${policyType.toUpperCase()}`;
+        this.iconPath = vscode.ThemeIcon.Folder;
+    }
+
+    addChildren(children: Policy[]) {
+        this.children.push(...children);
+    }
+
+    getChildren(): Policy[] {
+        return this.children;
+    }
+
+}
+
