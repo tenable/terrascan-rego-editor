@@ -83,12 +83,12 @@ export async function syncCmd(uri: vscode.Uri, isCodeLensCall: boolean) {
         ruleTemplate: regoFileContents,
         severity: metadata.severity,
         version: String(metadata.version),
+        vulnerability: metadata.description,
+        ruleReferenceId: metadata.id,
         // hardcoding below fields as they are not present in terrascan's metadata json
         engineType: "terraform",
-        vulnerability: "vulnerability",
         policy: "custom policy by Rego Editor extension",
-        custom: true,
-        ruleReferenceId: metadata.id
+        custom: true
     };
 
     let arr: BackendPolicyObject[] = [backendObj];

@@ -1,8 +1,8 @@
-import { BackendPolicyObject } from "../interface/backendMetadata";
+import { RuleResponse } from "../interface/backendMetadata";
 import * as regoEditorConfig from "../utils/configuration";
 import { BackendClient } from "./backendClient";
 
-export async function fetchAllCustomRules(): Promise<BackendPolicyObject[] | undefined | void> {
+export async function fetchAllCustomRules(): Promise<RuleResponse | undefined | void> {
 
     if (!regoEditorConfig.isBackendConfigValid()) {
         return;
