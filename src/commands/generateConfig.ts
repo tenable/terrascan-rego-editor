@@ -7,29 +7,49 @@ import { exec } from "child_process";
 import * as path from "path";
 import { LogUtils } from "../logger/loggingHelper";
 import stripAnsi = require("strip-ansi");
+import { getProvider, isUseDefaultProvider } from "../utils/configuration";
 
 
 export async function generateConfigCommand(context: ExtensionContext, uri: Uri) {
 
     // prompt for IAC type
     const iacType = await window.showQuickPick(constants.TERRASCAN_IAC_TYPES, { placeHolder: constants.IAC_TYPE_QUICK_PICK_PLACEHOLDER });
+    const generateConfigAbortMessage: string = "Config generation aborted!";
+
     if (iacType !== undefined) {
-        window.withProgress({
-            location: ProgressLocation.Window,
-            cancellable: false,
-            title: 'Generating Config'
-        }, async (progress) => {
-            progress.report({ increment: 0 });
-            generateConfig(context, uri, iacType);
-            progress.report({ increment: 100 });
-        });
+
+        if (isUseDefaultProvider()) {
+
+            executeGenerateConfig(context, uri, iacType, getProvider());
+        } else {
+
+            const providerType = await window.showQuickPick(constants.TERRASCAN_PROVIDER_TYPES, { placeHolder: constants.PROVIDER_TYPE_QUICK_PICK_PLACEHOLDER });
+
+            if (providerType !== undefined) {
+                executeGenerateConfig(context, uri, iacType, providerType);
+            } else {
+                window.showErrorMessage(generateConfigAbortMessage);
+            }
+        }
     } else {
-        window.showErrorMessage('Config generation aborted!');
+        window.showErrorMessage(generateConfigAbortMessage);
     }
 }
 
+async function executeGenerateConfig(context: ExtensionContext, uri: Uri, iacType: string, providerType: string) {
+    window.withProgress({
+        location: ProgressLocation.Window,
+        cancellable: false,
+        title: 'Generating Config'
+    }, async (progress) => {
+        progress.report({ increment: 0 });
+        generateConfig(context, uri, iacType, providerType);
+        progress.report({ increment: 100 });
+    });
+}
+
 // generate config json from iac files resources
-async function generateConfig(context: ExtensionContext, uri: Uri, iacType: string) {
+async function generateConfig(context: ExtensionContext, uri: Uri, iacType: string, providerType: string) {
     LogUtils.logMessage("Executing 'Generate Config' command!");
 
     if (!Utils.isTerrascanBinaryPresent(context)) {
@@ -80,7 +100,8 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
                 "terrascanConfig":${configJson},
                 "iacMetadata": {
                     "iacType":"${iacType}",
-                    "iacPath":"${getRelativePath(uri)}"
+                    "iacPath":"${getRelativePath(uri)}",
+                    "providerType":"${providerType}"
                 }
             }`), null, "\t");
 

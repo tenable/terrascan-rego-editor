@@ -33,16 +33,21 @@ export function setShowHelperTemplate(value: boolean) {
     regoEditorConfig.update("showRegoHelperTemplate", value, true);
 }
 
+export function getProvider(): string {
+    let regoEditorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(rootConfig);
+    return <string>regoEditorConfig.get("provider");
+}
+
+export function isUseDefaultProvider(): boolean {
+    let regoEditorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(rootConfig);
+    return <boolean>regoEditorConfig.get("useDefaultProvider");
+}
+
 export function initializeStatusBarItem(command: string): void {
     statusBarItem.command = command;
     statusBarItem.text = rootConfig;
     statusBarItem.show();
 };
-
-export function getProvider(): string {
-    let regoEditorConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(rootConfig);
-    return <string>regoEditorConfig.get("provider");
-}
 
 export function isBackendConfigValid(): boolean {
     let targetEnv: string = getTargetEnv();

@@ -173,6 +173,11 @@
 						"DOCKER"
 					],
 					"default": "AWS"
+				},
+				"regoeditor.useDefaultProvider": {
+					"type": "boolean",
+					"description": "Enable/disable default provider",
+					"default": false
 				}
 			}
 		},
