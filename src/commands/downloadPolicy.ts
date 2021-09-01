@@ -10,13 +10,13 @@ export async function downloadPolicy(policy: Policy) {
     LogUtils.logMessage("Executing 'Download' command!");
 
     let ruleMetadata: MetadataJSON = {
-        name: policy.policyObj.ruleName,
+        name: policy.policyObj.ruleDisplayName,
         file: policy.policyObj.ruleName + ".rego",
         template_args: getTemplateArgs(policy.policyObj.ruleArgument),
         severity: policy.policyObj.severity,
-        description: policy.policyObj.ruleDisplayName!,
-        reference_id: policy.policyObj.ruleReferenceId!,
-        id: policy.policyObj.ruleReferenceId!,
+        description: policy.policyObj.remediation!,
+        reference_id: policy.policyObj.ruleReferenceId,
+        id: policy.policyObj.ruleReferenceId,
         category: policy.policyObj.category!,
         version: Number(policy.policyObj.version),
         policy_type: policy.policyObj.provider,

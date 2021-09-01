@@ -68,8 +68,8 @@ export abstract class PolicyData extends vscode.TreeItem {
 export class Policy extends PolicyData {
 
     constructor(public policyObj: NormalizedRuleObject, public context: vscode.ExtensionContext) {
-        super(policyObj.ruleName, CONTEXT_VALUE_POLICY, vscode.TreeItemCollapsibleState.None);
-        this.description = policyObj.ruleDisplayName;
+        super(policyObj.ruleDisplayName, CONTEXT_VALUE_POLICY, vscode.TreeItemCollapsibleState.None);
+        this.description = policyObj.remediation;
         this.iconPath = new vscode.ThemeIcon(POLICY_ICON);
     }
 
