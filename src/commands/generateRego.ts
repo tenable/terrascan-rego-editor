@@ -205,7 +205,7 @@ async function generatePolicyFiles(uri: vscode.Uri, context: vscode.ExtensionCon
     const parsedUri = Utils.parseUri(uri);
 
     const resourceType = data.keys().next().value;
-    const provider = "PROVIDER";
+    const provider = regoEditorConfig.getProvider();
 
     let counter: number = regoEditorConfig.getPolicySuffixCounter();
     regoEditorConfig.setPolicySuffixCounter(counter + 1);
