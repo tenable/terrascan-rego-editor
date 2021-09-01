@@ -19,3 +19,33 @@ export interface BackendPolicyObject {
     version?: string,
     custom?: boolean
 };
+
+// RuleResponse is the response received for a GET request from Accurics backend
+export interface RuleResponse {
+    count: number,
+    rules: NormalizedRuleObject[]
+}
+
+// NormalizedRuleObject represents a single rule object received from Accurics backend
+export interface NormalizedRuleObject {
+    id: string,
+    ruleTemplateId: string,
+    ruleName: string,
+    ruleTemplate: string,
+    ruleTemplateName?: string,
+    ruleArgument?: string,
+    severity: string,
+    vulnerability: string,
+    remediation?: string
+    engineType: string,
+    provider: string,
+    managedBy: string,
+    ruleDisplayName: string,
+    category?: string,
+    policyRelevance?: string,
+    ruleReferenceId: string,
+    policy: string,
+    version?: number,
+    custom?: boolean,
+    resourceType: string
+};

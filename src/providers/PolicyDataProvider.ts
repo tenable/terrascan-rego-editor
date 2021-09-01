@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { fetchAllCustomRules } from '../commands/fetchCustomRules';
-import { BackendPolicyObject } from '../interface/backendMetadata';
+import { NormalizedRuleObject } from '../interface/backendMetadata';
 
 const CONTEXT_VALUE_PROVIDER = "provider";
 const CONTEXT_VALUE_POLICY = "policy";
@@ -34,8 +34,8 @@ export class PolicyDataProvider implements vscode.TreeDataProvider<PolicyData> {
         let allRules = await fetchAllCustomRules();
 
         let providers: PolicyType[] = [];
-        if (allRules && allRules.length > 0) {
-            let group = allRules.reduce((m, r) => {
+        if (allRules && allRules.count > 0) {
+            let group = allRules.rules.reduce((m, r) => {
                 m.set(r.provider, [...m.get(r.provider) || [],
                 new Policy(r, this.context)
                 ]);
@@ -67,9 +67,9 @@ export abstract class PolicyData extends vscode.TreeItem {
 
 export class Policy extends PolicyData {
 
-    constructor(public policyObj: BackendPolicyObject, public context: vscode.ExtensionContext) {
-        super(policyObj.ruleName, CONTEXT_VALUE_POLICY, vscode.TreeItemCollapsibleState.None);
-        this.description = policyObj.ruleDisplayName;
+    constructor(public policyObj: NormalizedRuleObject, public context: vscode.ExtensionContext) {
+        super(policyObj.ruleDisplayName, CONTEXT_VALUE_POLICY, vscode.TreeItemCollapsibleState.None);
+        this.description = policyObj.remediation;
         this.iconPath = new vscode.ThemeIcon(POLICY_ICON);
     }
 

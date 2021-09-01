@@ -1,29 +1,34 @@
 import * as vscode from 'vscode';
 import { HttpClient } from "typed-rest-client/HttpClient";
 import { IHeaders } from "typed-rest-client/Interfaces";
-import { BackendPolicyObject } from "../interface/backendMetadata";
+import { BackendPolicyObject, RuleResponse } from "../interface/backendMetadata";
 import { LogUtils } from "../logger/loggingHelper";
 
 export class BackendClient {
 
     private _requestTimeout: number = 10000;
     private _client: string = "rego-editor";
-    private _getRulesEndpoint: string = "/v1/api/rule";
-    private _pushRulesEndpoint: string = "/v1/api/rule/update";
+    private _getRulesEndpoint: string = "/v1/api/app/rule";
+    private _pushRulesEndpoint: string = "/v1/api/app/rule";
     private _header: IHeaders;
 
     constructor(public host: string, public appToken: string) {
+        // strip single '/' from the end of the URL
+        if (host.trim().charAt(host.length - 1) === '/') {
+            this.host = host.substr(0, host.length - 1);
+        }
+
         this._header = {
             "Authorization": "Bearer " + this.appToken
         };
     }
 
-    async getRules(): Promise<BackendPolicyObject[]> {
+    async getRules(): Promise<RuleResponse | undefined> {
 
         LogUtils.logMessage("sending request to get rules to Accurics backend");
 
         let client = new HttpClient(this._client);
-        return client.get(this.host + this._getRulesEndpoint, this._header)
+        return client.get(this.host + this._getRulesEndpoint + "?custom=true", this._header)
             .then((response) => {
                 let respMsg = response.message;
                 respMsg = respMsg.setTimeout(this._requestTimeout, () => {
@@ -37,18 +42,23 @@ export class BackendClient {
                     case 401:
                         throw new Error(`please make sure the 'App Token' is valid, response code: ${respMsg.statusCode},error message: ${respMsg.statusMessage}`);
                     default:
-                        throw new Error(`unable to upload rule, response code: ${respMsg.statusCode}, error message: ${respMsg.statusMessage}`);
+                        throw new Error(`unable to fetch rules, response code: ${respMsg.statusCode}, error message: ${respMsg.statusMessage}`);
                 }
             }).then(data => {
-                LogUtils.logMessage(`rules successfully downloaded from Accurics backend`);
-                vscode.window.showInformationMessage(`rules successfully downloaded from Accurics backend`);
-                let allRules: BackendPolicyObject[];
+                let allRules: RuleResponse;
                 allRules = JSON.parse(data);
+                if (allRules.count === 0) {
+                    LogUtils.logMessage(`request successful, no custom rules are present in the target environment`);
+                    vscode.window.showInformationMessage(`request successful, no custom rules are present in the target environment`);
+                } else {
+                    LogUtils.logMessage(`rules successfully downloaded from Accurics backend, rule count ${allRules.count}`);
+                    vscode.window.showInformationMessage(`rules successfully downloaded from Accurics backend, rule count ${allRules.count}`);
+                }
                 return allRules;
             }).catch((error) => {
                 LogUtils.logMessage(`downloading rules from Accurics backend failed, error: ${error.message}`);
                 vscode.window.showErrorMessage(`error while connecting to '${this.host}', error: ${error.message}`);
-                return [];
+                return undefined;
             });
     }
 
