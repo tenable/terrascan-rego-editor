@@ -12,7 +12,7 @@ information on using pull requests.
 
 ## Setting up Terrascan Rego Editor for local development
 
-To develop `terrascan-rego-editor`, you'll need the following installed in your system: Node, NPM, VSCode, git.
+To develop `terrascan-rego-editor`, you'll need the following installed in your system: Node, NPM, VS Code, git.
 
 Follow these steps after you install the required packages:
 1. Fork the `terrascan-rego-editor` repo on GitHub.
@@ -27,8 +27,8 @@ Follow these steps after you install the required packages:
    Now you can make your changes locally.
 4. Install the package dependencies by running `npm install`
 5. Compile the code by running `tsc -p ./` or `npm run compile`
-6. You can press F5 on VSCode to start debugging the extension
-7. To create a VSCode .vsix package for the extension, run `npm install -g vsce` and then `vsce package`.
+6. You can press F5 on VS Code to start debugging the extension
+7. To create a VS Code .vsix package for the extension, run `npm install -g vsce` and then `vsce package`.
 
 ## Community Guidelines
 
