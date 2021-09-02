@@ -9,7 +9,7 @@ Create and test Rego policies for Terrascan in Visual Studio Code.
 - Tests Rego policies against IaC files.
 - Ability to sync policies with [Accurics](https://accurics.com).
 
-*FIXME: Add screenshots here*
+![Terrascan Rego Editor demo](assets/terrascan-rego-editor-demo.gif)
 
 ## Getting Started
 Follow these steps to get started:
@@ -22,3 +22,15 @@ Follow these steps to get started:
 6. Update relevant files on the Rule JSON file according to your policy.
 7. Update the Rego file to enforce your policy.
 8. Right-click the Rego file and click on `RegoEditor: Scan` to test your policy.
+
+This extension supports multiple configuration options. To view the settings, open the command palette ("Ctrl + Shift + P" for Windows or "CMD + Shift + P" on Mac OS) and search for "RegoEditor: Configuration".
+
+From the configuration menu you should be able to customize:
+- The counter suffixed to policies
+- The default cloud provider
+- Whether to show the helper text on newly created Rego files
+- Credentials for syncing policies with [Accurics](https://accurics.com)
+
+## Contributing
+
+Contributions are always welcome in the form of documentation, blogs, issues, and pull requests. More details on [CONTRIBUTING.md](CONTRIBUTING.md).
