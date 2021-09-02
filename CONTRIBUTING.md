@@ -1,6 +1,6 @@
 # How to Contribute
 
-We'd love to accept your documentation, blogs, bugs, and fixes as a contribution to this project. There are
+We'd love to accept your documentation, blogs, bugs, and fixes as contributions to this project. There are
 just a few small guidelines you need to follow.
 
 ## Code reviews
