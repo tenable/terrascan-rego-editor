@@ -31,7 +31,8 @@ export interface ResourceConfig {
 
 export type IacMetadata = {
     iacType: string,
-    iacPath: string
+    iacPath: string,
+    providerType?: string
 };
 
 export type AllResourceConfig = Record<string, ResourceConfig[]>;
