@@ -4,6 +4,7 @@
 	"description": "Develop custom policies for Terrascan",
 	"version": "0.0.1",
 	"publisher": "AccuricsInc",
+	"icon": "assets/regoEditor.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/accurics/RegoEditor.git"
@@ -159,6 +160,24 @@
 					"type": "integer",
 					"description": "Policy suffix counter",
 					"default": 1
+				},
+				"regoeditor.provider": {
+					"type": "string",
+					"description": "Provider of a policy",
+					"enum": [
+						"AWS",
+						"AZURE",
+						"GCP",
+						"K8S",
+						"GITHUB",
+						"DOCKER"
+					],
+					"default": "AWS"
+				},
+				"regoeditor.useDefaultProvider": {
+					"type": "boolean",
+					"description": "Enable/disable default provider",
+					"default": false
 				}
 			}
 		},
@@ -167,7 +186,7 @@
 				{
 					"id": "regoeditor",
 					"title": "Rego Editor",
-					"icon": "assets/terrascan.png"
+					"icon": "assets/regoEditorActivityBar.svg"
 				}
 			]
 		},
@@ -175,7 +194,6 @@
 			"regoeditor": [
 				{
 					"id": "regoeditor.views.policies",
-					"icon": "assets/terrascan_logo.jpg",
 					"name": "Policies",
 					"type": "tree",
 					"when": "config.regoeditor.targetEnv != '' && config.regoeditor.appToken != ''",
@@ -183,7 +201,6 @@
 				},
 				{
 					"id": "regoeditor.views.welcome",
-					"icon": "assets/terrascan_logo.jpg",
 					"name": "Welcome",
 					"when": "config.regoeditor.targetEnv == '' || config.regoeditor.appToken == ''",
 					"visibility": "visible"

@@ -1,5 +1,8 @@
 export const TERRASCAN_IAC_TYPES: string[] = ["cft", "k8s", "terraform", "tfplan"];
-export const IAC_TYPE_QUICK_PICK_PLACEHOLDER: string = 'Pick iac type';
+export const IAC_TYPE_QUICK_PICK_PLACEHOLDER: string = 'Pick an IaC type';
+
+export const TERRASCAN_PROVIDER_TYPES: string[] = ["AWS", "AZURE", "GCP", "K8S", "GITHUB", "DOCKER"];
+export const PROVIDER_TYPE_QUICK_PICK_PLACEHOLDER: string = 'Pick a provider type';
 
 export const DOWNLOADING_REGO_EDITOR_TOOLS = 'Downloading RegoEditor tools';
 export const REGO_EDITOR_TOOLS_DOWNLOAD_SUCCESS = 'Rego Editor tools downloaded successfully';
