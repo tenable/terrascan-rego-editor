@@ -23,7 +23,7 @@ Follow these steps to get started:
 7. Update the Rego file to enforce your policy.
 8. Right-click the Rego file and click on `RegoEditor: Scan` to test your policy.
 
-This extension supports multiple configuration options. To view the settings, open the command palette ("Ctrl + Shift + P" for Windows or "CMD + Shift + P" on Mac OS) and search for "RegoEditor: Configuration".
+This extension supports multiple configuration options. To view the settings, open the command palette (`Ctrl + Shift + P` for Windows or `CMD + Shift + P` on Mac OS) and search for `RegoEditor: Configuration`.
 
 From the configuration menu you should be able to customize:
 - The counter suffixed to policies
