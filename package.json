@@ -210,7 +210,7 @@
 		"viewsWelcome": [
 			{
 				"view": "regoeditor.views.welcome",
-				"contents": "In order to use RegoEditor with Accurics, you need to configure your Accurics account with RegoEditor\n\n[Configure Accurics](command:regoeditor.configure \"Accurics Configurations\")"
+				"contents": "Configure your Accurics account within RegoEditor to sync policies\n\n[Configure Accurics](command:regoeditor.configure \"Accurics Configurations\")"
 			}
 		]
 	},
