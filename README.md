@@ -14,7 +14,7 @@ Create and test Rego policies for Terrascan in Visual Studio Code.
 ## Getting Started
 Follow these steps to get started:
 
-1. Install the extension from the [VS code marketplace](https://marketplace.visualstudio.com/items?itemName=accuricsinc.terrascan-RegoEditor)
+1. Install the extension from the [VS code marketplace](https://marketplace.visualstudio.com/items?itemName=accuricsinc.terrascan-rego-editor)
 2. Open an IaC template on VS Code.
 3. Highlight an IaC resource, right-click, and select `RegoEditor: Generate Config`.
 4. Select the IaC engine this template uses (e.g. terraform, cft, k8s, etc.). This generates a normalized JSON file including the highlighted resource and its parameters.
