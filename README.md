@@ -19,7 +19,7 @@ Follow these steps to get started:
 3. Highlight an IaC resource, right-click, and select `RegoEditor: Generate Config`.
 4. Select the IaC engine this template uses (e.g. terraform, cft, k8s, etc.). This generates a normalized JSON file including the highlighted resource and its parameters.
 5. Right-click the normalized JSON file and select `RegoEditor:  Generate Rego`. This creates a rule JSON and a Rego file.
-6. Update relevant files on the Rule JSON file according to your policy.
+6. Update relevant fields on the Rule JSON file according to your policy.
 7. Update the Rego file to enforce your policy.
 8. Right-click the Rego file and click on `RegoEditor: Scan` to test your policy.
 
