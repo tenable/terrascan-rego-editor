@@ -44,7 +44,7 @@ export const REGO_HELPER_TEMPLATE = `# Full Rego Documentation: https://www.open
 # If used in an assignment expression (x := y[_]), x's value will be the array (y[_])
 # If used in a comparison expression (y[_].name = x), the entire condition will be true if there exists at least one document in y for which the comparison is true.`;
 
-export const TERRASCAN_VERSION = "v1.8.1";
+export const TERRASCAN_VERSION = "v1.10.0";
 
 
 // REGO EDITOR COMMANDS
