@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
     let scanCommand = vscode.commands.registerCommand(COMMAND_SCAN, async (uri: vscode.Uri) => scan(context, uri));
 
     let configureCommand = vscode.commands.registerCommand(COMMAND_CONFIGURE, () => {
-        vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.regoeditor');
+        vscode.commands.executeCommand('workbench.action.openSettings', '@ext:AccuricsInc.terrascan-rego-editor');
     });
 
     let syncCommand = vscode.commands.registerCommand(COMMAND_SYNC, async (uri: vscode.Uri) => syncCmd(uri, false));

@@ -1,10 +1,10 @@
 {
-	"name": "regoeditor",
-	"displayName": "RegoEditor",
+	"name": "terrascan-rego-editor",
+	"displayName": "Terrascan Rego Editor",
 	"description": "Develop custom policies for Terrascan",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"publisher": "AccuricsInc",
-	"icon": "assets/regoEditor.png",
+	"icon": "assets/terrascan-rego-editor.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/accurics/RegoEditor.git"
@@ -185,7 +185,7 @@
 			"activitybar": [
 				{
 					"id": "regoeditor",
-					"title": "Rego Editor",
+					"title": "Terrascan Rego Editor",
 					"icon": "assets/regoEditorActivityBar.svg"
 				}
 			]
