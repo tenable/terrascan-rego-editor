@@ -45,6 +45,7 @@ export const REGO_HELPER_TEMPLATE = `# Full Rego Documentation: https://www.open
 # If used in a comparison expression (y[_].name = x), the entire condition will be true if there exists at least one document in y for which the comparison is true.`;
 
 export const TERRASCAN_VERSION = "v1.10.0";
+export const EXTENSION_NAME = "terrascan-rego-editor";
 
 
 // REGO EDITOR COMMANDS

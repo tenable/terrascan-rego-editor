@@ -12,6 +12,7 @@
 */
 
 import * as vscode from "vscode";
+import { EXTENSION_NAME } from "../constants";
 
 const rootConfig: string = "regoeditor";
 const statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem();
@@ -58,7 +59,7 @@ export function isUseDefaultProvider(): boolean {
 
 export function initializeStatusBarItem(command: string): void {
     statusBarItem.command = command;
-    statusBarItem.text = rootConfig;
+    statusBarItem.text = EXTENSION_NAME;
     statusBarItem.show();
 };
 

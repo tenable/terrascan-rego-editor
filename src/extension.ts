@@ -21,7 +21,7 @@ import { scan } from "./commands/scan";
 import { initializeStatusBarItem } from './utils/configuration';
 import { syncCmd } from './commands/syncCommand';
 import { MetadataCodeLensProvider } from './providers/metadataCodeLensProvider';
-import { COMMAND_CONFIGURE, COMMAND_DOWNLOAD_POLICY, COMMAND_FETCH_ALL_CUSTOM_RULES, COMMAND_GENERATE_CONFIG, COMMAND_GENERATE_REGO, COMMAND_SCAN, COMMAND_SYNC } from './constants';
+import { COMMAND_CONFIGURE, COMMAND_DOWNLOAD_POLICY, COMMAND_FETCH_ALL_CUSTOM_RULES, COMMAND_GENERATE_CONFIG, COMMAND_GENERATE_REGO, COMMAND_SCAN, COMMAND_SYNC, EXTENSION_NAME } from './constants';
 import { Policy, PolicyDataProvider } from "./providers/PolicyDataProvider";
 import { downloadPolicy } from './commands/downloadPolicy';
 
@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // initialize extension logger
     LogUtils.setLoggerObject(new RegoLogger(context));
-    LogUtils.logMessage('rego-editor activated!');
+    LogUtils.logMessage(`${EXTENSION_NAME} activated!`);
 
     // initialize status bar item for configure command
     initializeStatusBarItem(COMMAND_CONFIGURE);
