@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2021 Accurics, Inc.
+    Copyright (C) 2022 Tenable, Inc.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 */
 
 // BackendPolicyObject represents the fields required in rule upload request
-// by accurics backend
+// by Tenable.cs backend
 export interface BackendPolicyObject {
     ruleName: string,
     provider: string
@@ -33,13 +33,13 @@ export interface BackendPolicyObject {
     custom?: boolean
 };
 
-// RuleResponse is the response received for a GET request from Accurics backend
+// RuleResponse is the response received for a GET request from Tenable.cs backend
 export interface RuleResponse {
     count: number,
     rules: NormalizedRuleObject[]
 }
 
-// NormalizedRuleObject represents a single rule object received from Accurics backend
+// NormalizedRuleObject represents a single rule object received from Tenable.cs backend
 export interface NormalizedRuleObject {
     id: string,
     ruleTemplateId: string,

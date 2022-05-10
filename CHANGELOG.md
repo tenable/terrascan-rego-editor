@@ -9,4 +9,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Ability to generate standardized JSON configuration used as input to Terrascan's policy engine.
 - Ability to generate a pre-populated Rego template using parameters from resources in your IaC files as input.
 - Ability to tests Rego policies against IaC files.
-- Ability to sync policies with [Accurics](https://accurics.com)
+- Ability to sync policies with [Tenable.cs](https://www.tenable.com/products/tenable-cs)

@@ -7,7 +7,7 @@
 	"icon": "assets/terrascan-rego-editor.png",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/accurics/RegoEditor.git"
+		"url": "https://github.com/tenable/terrascan-rego-editor.git"
 	},
 	"engines": {
 		"vscode": "^1.57.0"
@@ -145,11 +145,11 @@
 			"properties": {
 				"regoeditor.targetEnv": {
 					"type": "string",
-					"description": "Accurics environment URL"
+					"description": "Tenable environment URL"
 				},
 				"regoeditor.appToken": {
 					"type": "string",
-					"description": "App token created for your Accurics account"
+					"description": "App token created for your Tenable.cs account"
 				},
 				"regoeditor.showRegoHelperTemplate": {
 					"type": "boolean",
@@ -210,7 +210,7 @@
 		"viewsWelcome": [
 			{
 				"view": "regoeditor.views.welcome",
-				"contents": "Configure your Accurics account within RegoEditor to sync policies\n\n[Configure Accurics](command:regoeditor.configure \"Accurics Configurations\")"
+				"contents": "Configure your Tenable.cs account within RegoEditor to sync policies\n\n[Configure Tenable](command:regoeditor.configure \"Tenable Configurations\")"
 			}
 		]
 	},

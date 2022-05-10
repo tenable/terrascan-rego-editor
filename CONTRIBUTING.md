@@ -32,5 +32,5 @@ Follow these steps after you install the required packages:
 
 ## Community Guidelines
 
-This project follows
-[Accurics by Terrascan Code of Conduct](https://github.com/accurics/terrascan/blob/master/code_of_conduct.md).
+This project follows the
+[Terrascan Code of Conduct](https://github.com/accurics/terrascan/blob/master/code_of_conduct.md).

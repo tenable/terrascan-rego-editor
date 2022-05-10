@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2021 Accurics, Inc.
+    Copyright (C) 2022 Tenable, Inc.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -30,7 +30,7 @@ export class MetadataCodeLensProvider implements CodeLensProvider {
                 if (line.text.charAt(line.firstNonWhitespaceCharacterIndex) === "{") {
                     let command: Command = {
                         title: "Sync",
-                        tooltip: "Sync rule to Accurics backend",
+                        tooltip: "Sync rule to Tenable.cs backend",
                         command: COMMAND_SYNC,
                         arguments: [document.uri, true]
                     };
