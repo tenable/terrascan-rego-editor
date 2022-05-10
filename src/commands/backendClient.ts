@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2021 Accurics, Inc.
+    Copyright (C) 2022 Tenable, Inc.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -38,7 +38,7 @@ export class BackendClient {
 
     async getRules(): Promise<RuleResponse | undefined> {
 
-        LogUtils.logMessage("sending request to get rules to Accurics backend");
+        LogUtils.logMessage("sending request to get rules to Tenable.cs backend");
 
         let client = new HttpClient(this._client);
         return client.get(this.host + this._getRulesEndpoint + "?custom=true", this._header)
@@ -48,7 +48,7 @@ export class BackendClient {
                     throw new Error("request timed out after 10 seconds, please check if target environment is up.");
                 });
 
-                // handle different status codes valid for Accurics backend
+                // handle different status codes valid for Tenable.cs backend
                 switch (respMsg.statusCode) {
                     case 200:
                         return response.readBody();
@@ -64,12 +64,12 @@ export class BackendClient {
                     LogUtils.logMessage(`request successful, no custom rules are present in the target environment`);
                     vscode.window.showInformationMessage(`request successful, no custom rules are present in the target environment`);
                 } else {
-                    LogUtils.logMessage(`rules successfully downloaded from Accurics backend, rule count ${allRules.count}`);
-                    vscode.window.showInformationMessage(`rules successfully downloaded from Accurics backend, rule count ${allRules.count}`);
+                    LogUtils.logMessage(`rules successfully downloaded from Tenable.cs backend, rule count ${allRules.count}`);
+                    vscode.window.showInformationMessage(`rules successfully downloaded from Tenable.cs backend, rule count ${allRules.count}`);
                 }
                 return allRules;
             }).catch((error) => {
-                LogUtils.logMessage(`downloading rules from Accurics backend failed, error: ${error.message}`);
+                LogUtils.logMessage(`downloading rules from Tenable.cs backend failed, error: ${error.message}`);
                 vscode.window.showErrorMessage(`error while connecting to '${this.host}', error: ${error.message}`);
                 return undefined;
             });
@@ -77,7 +77,7 @@ export class BackendClient {
 
     async pushRules(data: BackendPolicyObject[]): Promise<boolean> {
 
-        LogUtils.logMessage("sending request to push rules to Accurics backend");
+        LogUtils.logMessage("sending request to push rules to Tenable.cs backend");
 
         let client = new HttpClient(this._client);
         return client.post(this.host + this._pushRulesEndpoint, JSON.stringify(data), this._header)
@@ -87,7 +87,7 @@ export class BackendClient {
                     throw new Error("request timed out after 10 seconds, please check if target environment is up.");
                 });
 
-                // handle different status codes valid for Accurics backend
+                // handle different status codes valid for Tenable.cs backend
                 switch (respMsg.statusCode) {
                     case 200:
                     case 400:
@@ -100,15 +100,15 @@ export class BackendClient {
                 }
             }).then(data => {
                 if (data.includes("400")) {
-                    LogUtils.logMessage(`rule upload to Accurics backend failed, error: ${data}`);
+                    LogUtils.logMessage(`rule upload to Tenable.cs backend failed, error: ${data}`);
                     vscode.window.showErrorMessage(`rule upload failed, response: ${data}`);
                     return false;
                 }
-                LogUtils.logMessage(`rule uploaded to Accurics backend successfully, output: ${data}`);
+                LogUtils.logMessage(`rule uploaded to Tenable.cs backend successfully, output: ${data}`);
                 vscode.window.showInformationMessage(`rule upload successful`);
                 return true;
             }).catch((error) => {
-                LogUtils.logMessage(`rule upload to Accurics backend failed, error: ${error.message}`);
+                LogUtils.logMessage(`rule upload to Tenable.cs backend failed, error: ${error.message}`);
                 vscode.window.showErrorMessage(`error while connecting to '${this.host}', error: ${error.message}`);
                 return false;
             });

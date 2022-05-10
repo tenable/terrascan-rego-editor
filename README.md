@@ -7,7 +7,7 @@ Create and test Rego policies for Terrascan in Visual Studio Code.
 - Generates standardized JSON configuration used as input to Terrascan's policy engine.
 - Generates a pre-populated Rego template using parameters from resources in your IaC files as input.
 - Tests Rego policies against IaC files.
-- Ability to sync policies with [Accurics](https://accurics.com).
+- Ability to sync policies with [Tenable.cs](https://www.tenable.com/products/tenable-cs).
 
 ![Terrascan Rego Editor demo](assets/terrascan-rego-editor-demo.gif)
 
@@ -29,7 +29,7 @@ From the configuration menu you should be able to customize:
 - The counter suffixed to policies
 - The default cloud provider
 - Whether to show the helper text on newly created Rego files
-- Credentials for syncing policies with [Accurics](https://accurics.com)
+- Credentials for syncing policies with [Tenable.cs](https://www.tenable.com/products/tenable-cs)
 
 ## Contributing
 
