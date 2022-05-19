@@ -2,7 +2,9 @@
 
 This file documents notable changes to the terrascan-rego-editor.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [v0.1.1]
+### Bugfix
+- Fixed a bug causing failure while installing for the first time users.
 
 ## [v0.1.0]
 ### Added
