@@ -25,7 +25,7 @@ export class TerrascanDownloader extends BinaryDownloader {
     private downloadedFilePath: string = '';
 
     private host: string = 'api.github.com';
-    private path: string = '/repos/accurics/terrascan/releases';
+    private path: string = '/repos/tenable/terrascan/releases';
 
 
     constructor(public context: ExtensionContext) {
