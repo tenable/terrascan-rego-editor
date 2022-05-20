@@ -26,9 +26,9 @@ jobs:
         run: exit 1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2.3.0
+        uses: actions/setup-node@v3
         with:
-          node-version: 12.x
+          node-version: 16
 
       - name: Install Dependencies
         run: npm ci
