@@ -225,7 +225,7 @@
 	"dependencies": {
 		"decompress": "^4.2.1",
 		"strip-ansi": "^6.0.0",
-		"typed-rest-client": "^1.8.6"
+		"typed-rest-client": "^1.8.9"
 	},
 	"devDependencies": {
 		"@types/decompress": "^4.2.3",
