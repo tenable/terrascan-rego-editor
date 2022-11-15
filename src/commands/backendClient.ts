@@ -21,8 +21,8 @@ export class BackendClient {
 
     private _requestTimeout: number = 10000;
     private _client: string = "rego-editor";
-    private _getRulesEndpoint: string = "/v1/api/app/rule";
-    private _pushRulesEndpoint: string = "/v1/api/app/rule";
+    private _getRulesEndpoint: string = "/v1/app/rules";
+    private _pushRulesEndpoint: string = "/v1/app/rule";
     private _header: IHeaders;
 
     constructor(public host: string, public appToken: string) {
