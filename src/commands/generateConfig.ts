@@ -113,7 +113,7 @@ async function generateConfig(context: ExtensionContext, uri: Uri, iacType: stri
                 "terrascanConfig":${configJson},
                 "iacMetadata": {
                     "iacType":"${iacType}",
-                    "iacPath":"${getRelativePath(uri)}",
+                    "iacPath":"${getRelativePath(uri).split(path.sep).join(path.posix.sep)}",
                     "providerType":"${providerType}"
                 }
             }`), null, "\t");
