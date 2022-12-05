@@ -2,6 +2,10 @@
 
 This file documents notable changes to the terrascan-rego-editor.
 
+## [v0.1.2]
+### Bugfix
+- Fixed a bug causing failure while invoking tenable cs apis.
+
 ## [v0.1.1]
 ### Bugfix
 - Fixed a bug causing failure while installing for the first time users.

@@ -2,7 +2,7 @@
 	"name": "terrascan-rego-editor",
 	"displayName": "Terrascan Rego Editor",
 	"description": "Develop custom policies for Terrascan",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"publisher": "AccuricsInc",
 	"icon": "assets/terrascan-rego-editor.png",
 	"repository": {
